@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> userIdList;
     private ArrayList<String> userNameList;
     private ListView mListView;
-    private Button getInfo, insertUser;
+    private Button getInfo, insertUser, toUpdate;
     private EditText insertUserID, insertUserName;
     ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         getInfo = (Button)findViewById(R.id.getInfo);
         insertUser = (Button)findViewById(R.id.insertUser);
+        toUpdate = (Button)findViewById(R.id.toUpdateUserInfo);
 
         insertUserID = (EditText)findViewById(R.id.userID);
         insertUserName = (EditText)findViewById(R.id.userName);
@@ -59,12 +61,22 @@ public class MainActivity extends AppCompatActivity {
         getInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getUserinfo();
+                getUserInfo();
+            }
+        });
+
+        toUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, UpdateUserInformation.class);
+                startActivity(intent);
             }
         });
     }
 
     private void insertNewUser(){
+        userIdList.clear();
+        userNameList.clear();
         if(insertUserID.getText().toString().length() == 0){
             Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
             return;
@@ -74,24 +86,33 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         User user = new User(insertUserID.getText().toString(), insertUserName.getText().toString());
-        Call<Object> insertUser = apiInterface.insertUser(user.getId(), user.getName());
-        insertUser.enqueue(new Callback<Object>() {
+        Call<UserList> insertUser = apiInterface.insertUser(user.getId(), user.getName());
+        insertUser.enqueue(new Callback<UserList>() {
             @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
-                Toast.makeText(getApplicationContext(), "성공적으로 추가하였습니다.", Toast.LENGTH_SHORT).show();
+            public void onResponse(Call<UserList> call, Response<UserList> response) {
+                UserList resultList = response.body();
+                List<UserList.Users> usersList = resultList.data;
 
-                Log.d("RESULT", new Gson().toJson(response.body()));
+                for(UserList.Users user : usersList)
+                    userIdList.add(user.id);
+
+                if(userIdList.get(0) != null){
+                    Toast.makeText(getApplicationContext(), "성공적으로 추가하였습니다.", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Log.d("ERROR", t.getMessage());
+            public void onFailure(Call<UserList> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("ABC", t.getMessage());
                 call.cancel();
             }
         });
     }
 
-    private void getUserinfo(){
+    private void getUserInfo(){
         userIdList.clear();
         userNameList.clear();
         Call<UserList> getListInfo = apiInterface.getUserList();
@@ -103,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     UserList resultList = response.body();
                     List<UserList.Users> usersList = resultList.data;
                     String debugResponse = "";
+
                     for(UserList.Users user : usersList){
                         userIdList.add(user.id);
                         userNameList.add(user.name);
@@ -119,7 +141,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<UserList> call, Throwable t) {
-
+                Toast.makeText(getApplicationContext(), "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("ABC", t.getMessage());
+                call.cancel();
             }
         });
 
