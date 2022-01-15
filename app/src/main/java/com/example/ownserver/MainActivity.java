@@ -4,7 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,8 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> userIdList;
     private ArrayList<String> userNameList;
     private ListView mListView;
-    private Button getInfo, insertUser, toUpdate;
+    private Button getInfo, insertUser, toUpdate, toDelete;
     private EditText insertUserID, insertUserName;
+    private Context context = this;
+    private boolean deleteFlag = false;
     ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
@@ -44,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         getInfo = (Button)findViewById(R.id.getInfo);
         insertUser = (Button)findViewById(R.id.insertUser);
         toUpdate = (Button)findViewById(R.id.toUpdateUserInfo);
+        toDelete = (Button)findViewById(R.id.deleteInfo);
 
         insertUserID = (EditText)findViewById(R.id.userID);
         insertUserName = (EditText)findViewById(R.id.userName);
@@ -72,20 +79,81 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        toDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteDialog();
+            }
+        });
+    }
+
+    private void deleteDialog(){
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.delete_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        EditText deleteID = (EditText)dialog.findViewById(R.id.deleteUserID);
+        Button yes = (Button)dialog.findViewById(R.id.delete_yes);
+        Button no = (Button)dialog.findViewById(R.id.delete_no);
+
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String deleteIdValue = deleteID.getText().toString().trim();
+
+                if(deleteIdValue.length() == 0){
+                    Toast.makeText(context, "삭제할 아이디를 입력하세요", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Delete User Method
+                Call<Void> deleteUser = apiInterface.deleteUser(deleteIdValue);
+                deleteUser.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if(response.isSuccessful()){
+                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
+                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
+                            dialog.dismiss();
+                        }else{
+                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "삭제에 실패", Toast.LENGTH_SHORT).show();
+                        Log.d("FAIL", t.getMessage());
+                        call.cancel();
+                    }
+                });
+            }
+        });
+
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     private void insertNewUser(){
         userIdList.clear();
         userNameList.clear();
-        if(insertUserID.getText().toString().length() == 0){
+
+        if(insertUserID.getText().toString().trim().length() == 0){
             Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(insertUserName.getText().toString().length() < 2){
+        if(insertUserName.getText().toString().trim().length() < 2){
             Toast.makeText(this, "이름을 입력하세요", Toast.LENGTH_SHORT).show();
             return;
         }
-        User user = new User(insertUserID.getText().toString(), insertUserName.getText().toString());
+
+        User user = new User(insertUserID.getText().toString().trim(), insertUserName.getText().toString().trim());
         Call<UserList> insertUser = apiInterface.insertUser(user.getId(), user.getName());
         insertUser.enqueue(new Callback<UserList>() {
             @Override
@@ -97,16 +165,16 @@ public class MainActivity extends AppCompatActivity {
                     userIdList.add(user.id);
 
                 if(userIdList.get(0) != null){
-                    Toast.makeText(getApplicationContext(), "성공적으로 추가하였습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "성공적으로 추가하였습니다.", Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserList> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("ABC", t.getMessage());
+                Toast.makeText(context, "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("FAIL", t.getMessage());
                 call.cancel();
             }
         });
@@ -115,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
     private void getUserInfo(){
         userIdList.clear();
         userNameList.clear();
+
         Call<UserList> getListInfo = apiInterface.getUserList();
         getListInfo.enqueue(new Callback<UserList>() {
             @Override
@@ -141,8 +210,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<UserList> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("ABC", t.getMessage());
+                Toast.makeText(context, "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("FAIL", t.getMessage());
                 call.cancel();
             }
         });
