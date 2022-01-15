@@ -10,4 +10,8 @@ My Practice Project
 ![1](https://user-images.githubusercontent.com/97011241/148894536-4278cb30-8635-439c-b802-d26ecce9388f.png)
 
 2022/01/11 PHP를 사용한 POST 구현  
-![2](https://user-images.githubusercontent.com/97011241/148894613-0a99a44f-f05e-4b6d-be41-2eba82c513aa.png)
+![2](https://user-images.githubusercontent.com/97011241/148894613-0a99a44f-f05e-4b6d-be41-2eba82c513aa.png)  
+
+2022/01/13 PHP를 사용한 PUT 구현, POST시 JSON을 Response 받아 내용에 따라서 앱에서 다른 분기 실행  
+![1](https://user-images.githubusercontent.com/97011241/149296577-dfbc20a6-7a93-4949-a223-7091157f13ee.png)
+![2](https://user-images.githubusercontent.com/97011241/149296586-414e208b-6d72-430b-9748-17265ff4a1da.png)

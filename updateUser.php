@@ -13,13 +13,12 @@
 		$errMSG = "오류! 아이디를 입력하세요";
 	}
 	if(empty($name)){
-		$errMSG = "오류! 이름을 입력하세요";
+		$errMSG = "오류! 변경할 이름을 입력하세요";
 	}
 
 	if(!isset($errMSG)){
 		$result = array();
-		$data = "'".$id."','".$name."'";
-		$res = mysqli_query($con, "insert into USER_INFO values(".$data.")");
+		$res = mysqli_query($con, "update USER_INFO set name = '".$name."' where id = '".$id."';");
 
 		if($res){
 			$res1 = mysqli_query($con, "select * from USER_INFO where id = '".$id."';");
@@ -30,12 +29,15 @@
 			header('Content-Type: application/json; charset=utf8');
 			$json = json_encode(array("data"=>$result), JSON_PRETTY_PRINT+JSON_UNESCAPED_UNICODE);
 			echo $json;
-		}else{
+		}
+		else{
 			echo "Fail";
 		}
 	}else{
+		
 		echo $errMSG;
 	}
+
 
 	mysqli_close($con);
 ?>
