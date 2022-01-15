@@ -14,4 +14,8 @@ My Practice Project
 
 2022/01/13 PHP를 사용한 PUT 구현, POST시 JSON을 Response 받아 내용에 따라서 앱에서 다른 분기 실행  
 ![1](https://user-images.githubusercontent.com/97011241/149296577-dfbc20a6-7a93-4949-a223-7091157f13ee.png)
-![2](https://user-images.githubusercontent.com/97011241/149296586-414e208b-6d72-430b-9748-17265ff4a1da.png)
+![2](https://user-images.githubusercontent.com/97011241/149296586-414e208b-6d72-430b-9748-17265ff4a1da.png)  
+
+2022/01/16 PHP를 사용한 DELETE 구현, PHP 파일 구조 수정(include 사용하여 DB 연결)
+![1](https://user-images.githubusercontent.com/97011241/149626653-839d0cd1-c8ca-4838-85f5-94a834838826.png)  
+![2](https://user-images.githubusercontent.com/97011241/149626655-9d40b84a-55d7-4ce5-a5d5-15e2bbfe12f2.png)
