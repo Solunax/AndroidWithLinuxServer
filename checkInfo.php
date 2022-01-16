@@ -1,11 +1,8 @@
 <?php
-	$con = mysqli_connect("localhost", "test", "1111", "USER");
-	if(!$con){
-		echo "FAIL";	
-	}
+	include 'dbCheck.php';
 	
 	mysqli_set_charset($con, "utf8");
-	$res = mysqli_query($con, "select * from USER_INFO");
+	$res = mysqli_query($con, "select * from USER_INFO;");
 	$result = array();
 
 	while($row = mysqli_fetch_array($res)){
