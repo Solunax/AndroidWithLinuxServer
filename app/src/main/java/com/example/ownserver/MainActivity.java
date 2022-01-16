@@ -1,9 +1,7 @@
 package com.example.ownserver;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,12 +17,9 @@ import android.widget.Toast;
 
 import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,11 +29,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> userIdList;
     private ArrayList<String> userNameList;
     private ListView mListView;
-    private Button getInfo, insertUser, toUpdate, toDelete;
+    private Button getInfo, insertUser, toUpdate, toDelete, toUpload;
     private EditText insertUserID, insertUserName;
     private Context context = this;
-    private boolean deleteFlag = false;
-    ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         insertUser = (Button)findViewById(R.id.insertUser);
         toUpdate = (Button)findViewById(R.id.toUpdateUserInfo);
         toDelete = (Button)findViewById(R.id.deleteInfo);
+        toUpload = (Button)findViewById(R.id.toUpload);
 
         insertUserID = (EditText)findViewById(R.id.userID);
         insertUserName = (EditText)findViewById(R.id.userName);
@@ -75,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         toUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, UpdateUserInformation.class);
+                Intent intent = new Intent(context, UpdateUserInformation.class);
                 startActivity(intent);
             }
         });
@@ -84,6 +79,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 deleteDialog();
+            }
+        });
+
+        toUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ImageUpload.class);
+                startActivity(intent);
             }
         });
     }

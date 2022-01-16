@@ -25,7 +25,7 @@ public class UpdateUserInformation extends Activity {
     private ArrayList<String> userIdList;
     private EditText id, name;
     private Button update;
-    ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
