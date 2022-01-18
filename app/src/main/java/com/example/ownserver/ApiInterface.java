@@ -1,5 +1,8 @@
 package com.example.ownserver;
 
+import com.example.ownserver.model.IdList;
+import com.example.ownserver.model.LoginInfo;
+import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
 
 import okhttp3.MultipartBody;
@@ -14,12 +17,21 @@ import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 public interface ApiInterface {
+    @GET("getMyInfo.php")
+    Call<User> getMyInfo(@Query("id") String id);
+
     @GET("checkInfo.php")
     Call<UserList> getUserList();
 
+    @GET("idCheck.php")
+    Call<IdList> getUserIDs();
+
+    @GET("getLoginInfo.php")
+    Call<LoginInfo> getLoginInfo(@Query("id") String id);
+
     @FormUrlEncoded
-    @POST("insertUser.php")
-    Call<UserList> insertUser(@Field("id") String id, @Field("name") String name);
+    @POST("join.php")
+    Call<UserList> insertUser(@Field("id") String id, @Field("password") String password, @Field("name") String name);
 
     @FormUrlEncoded
     @POST("updateUser.php")

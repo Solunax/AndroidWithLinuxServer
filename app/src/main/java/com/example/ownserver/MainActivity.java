@@ -2,63 +2,76 @@ package com.example.ownserver;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ownserver.model.LoginInfo;
 import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    private ArrayList<String> userIdList;
-    private ArrayList<String> userNameList;
+    private String serverBasePath = "http://192.168.56.117/userImage/";
+    private ArrayList<String> userIdList = new ArrayList<>();
+    private ArrayList<String> userNameList = new ArrayList<>();
+    private ArrayList<String> myInfo = new ArrayList<>();
     private ListView mListView;
-    private Button getInfo, insertUser, toUpdate, toDelete, toUpload;
-    private EditText insertUserID, insertUserName;
+    private Button getInfo, toUpdate, toDelete, toUpload;
+    private TextView userID, userName, userAuth;
+    private ImageButton img;
     private Context context = this;
-    private ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private final int code = 1;
+    public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent beforeData = getIntent();
+        String loginId = beforeData.getStringExtra("id");
+
+        loadUserInfo(loginId);
+
         mListView = (ListView)findViewById(R.id.infoList);
 
         getInfo = (Button)findViewById(R.id.getInfo);
-        insertUser = (Button)findViewById(R.id.insertUser);
         toUpdate = (Button)findViewById(R.id.toUpdateUserInfo);
         toDelete = (Button)findViewById(R.id.deleteInfo);
         toUpload = (Button)findViewById(R.id.toUpload);
+        img= (ImageButton)findViewById(R.id.profile_image);
 
-        insertUserID = (EditText)findViewById(R.id.userID);
-        insertUserName = (EditText)findViewById(R.id.userName);
-
-        userIdList = new ArrayList<>();
-        userNameList = new ArrayList<>();
-
-        insertUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                insertNewUser();
-            }
-        });
+        userID = (TextView)findViewById(R.id.id);
+        userName = (TextView)findViewById(R.id.name);
+        userAuth = (TextView)findViewById(R.id.auth);
 
         getInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +100,50 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(context, ImageUpload.class);
                 startActivity(intent);
+            }
+        });
+
+        img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                startActivityForResult(intent, code);
+            }
+        });
+    }
+
+    private void loadUserInfo(String id){
+        Call<User> getMyInfo = apiInterface.getMyInfo(id);
+        getMyInfo.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User result = response.body();
+                String debugResponse = "";
+
+                for(String value: result.getData()){
+                    myInfo.add(value);
+                    debugResponse += value + " ";
+                }
+                Log.d("VALUE", debugResponse);
+
+                userID.setText(myInfo.get(0));
+                userName.setText(myInfo.get(1));
+                if(myInfo.get(2).equals("A"))
+                    userAuth.setText("관리자");
+                else
+                    userAuth.setText("유저");
+
+                if(myInfo.get(3) != null)
+                    Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                else
+                    Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+
             }
         });
     }
@@ -143,46 +200,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void insertNewUser(){
-        userIdList.clear();
-        userNameList.clear();
-
-        if(insertUserID.getText().toString().trim().length() == 0){
-            Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if(insertUserName.getText().toString().trim().length() < 2){
-            Toast.makeText(this, "이름을 입력하세요", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        User user = new User(insertUserID.getText().toString().trim(), insertUserName.getText().toString().trim());
-        Call<UserList> insertUser = apiInterface.insertUser(user.getId(), user.getName());
-        insertUser.enqueue(new Callback<UserList>() {
-            @Override
-            public void onResponse(Call<UserList> call, Response<UserList> response) {
-                UserList resultList = response.body();
-                List<UserList.Users> usersList = resultList.data;
-
-                for(UserList.Users user : usersList)
-                    userIdList.add(user.id);
-
-                if(userIdList.get(0) != null){
-                    Toast.makeText(context, "성공적으로 추가하였습니다.", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(context, "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserList> call, Throwable t) {
-                Toast.makeText(context, "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("FAIL", t.getMessage());
-                call.cancel();
-            }
-        });
-    }
-
     private void getUserInfo(){
         userIdList.clear();
         userNameList.clear();
@@ -218,6 +235,47 @@ public class MainActivity extends AppCompatActivity {
                 call.cancel();
             }
         });
+    }
 
+    private void uploadImages(String id, String imageFile){
+        File file = new File(imageFile);
+        String serverPath = serverBasePath + id;
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
+
+        Call<Void> upload = apiInterface.uploadImage(body, id, serverPath);
+        upload.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.d("SUCCESS", "SUCCESS");
+                Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+                String url = serverBasePath + id;
+                Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "업로드에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("FAIL", t.getMessage());
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == code){
+            String path = getPath(data.getData());
+            uploadImages(userID.getText().toString().trim(), path);
+        }
+    }
+
+    private String getPath(Uri uri){
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToNext();
+        @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex("_data"));
+        cursor.close();
+
+        return path;
     }
 }
