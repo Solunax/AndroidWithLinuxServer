@@ -1,5 +1,6 @@
 package com.example.ownserver;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -11,6 +12,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ownserver.model.Data;
 import com.example.ownserver.model.LoginInfo;
 import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
@@ -49,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton img;
     private Context context = this;
     private final int code = 1;
+    private final int loadUserComplete = 100;
+    private final int loadUserListComplete = 101;
+    private final int changeProfileImage = 200;
+    private Handler handler;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
@@ -58,6 +66,38 @@ public class MainActivity extends AppCompatActivity {
 
         Intent beforeData = getIntent();
         String loginId = beforeData.getStringExtra("id");
+
+        handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                switch (msg.what){
+                    case loadUserComplete:
+                        userID.setText(myInfo.get(0));
+                        userName.setText(myInfo.get(1));
+                        if(myInfo.get(2).equals("A"))
+                            userAuth.setText("관리자");
+                        else
+                            userAuth.setText("유저");
+
+                        if(myInfo.get(3) != null)
+                            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                        else
+                            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                        break;
+
+                    case loadUserListComplete:
+                        UserListAdapter userListAdapter = new UserListAdapter(MainActivity.this, userIdList, userNameList);
+                        userListAdapter.notifyDataSetChanged();
+                        mListView.setAdapter(userListAdapter);
+                        break;
+
+                    case changeProfileImage:
+                        Glide.with(context).load(msg.obj).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
+                        break;
+                }
+                return false;
+            }
+        });
 
         loadUserInfo(loginId);
 
@@ -76,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         getInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getUserInfo();
+                getUserList();
             }
         });
 
@@ -114,38 +154,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUserInfo(String id){
-        Call<User> getMyInfo = apiInterface.getMyInfo(id);
-        getMyInfo.enqueue(new Callback<User>() {
+        new Thread(new Runnable(){
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                User result = response.body();
-                String debugResponse = "";
+            public void run() {
+                Message msg = handler.obtainMessage();
+                Call<Data> getMyInfo = apiInterface.getMyInfo(id);
+                getMyInfo.enqueue(new Callback<Data>() {
+                    @Override
+                    public void onResponse(Call<Data> call, Response<Data> response) {
+                        Data result = response.body();
+                        String debugResponse = "";
 
-                for(String value: result.getData()){
-                    myInfo.add(value);
-                    debugResponse += value + " ";
-                }
-                Log.d("VALUE", debugResponse);
+                        for(String value: result.getData()){
+                            myInfo.add(value);
+                            debugResponse += value + " ";
+                        }
+                        Log.d("VALUE", debugResponse);
 
-                userID.setText(myInfo.get(0));
-                userName.setText(myInfo.get(1));
-                if(myInfo.get(2).equals("A"))
-                    userAuth.setText("관리자");
-                else
-                    userAuth.setText("유저");
+                        msg.what = loadUserComplete;
+                        msg.obj = "유저정보 불러오기 완료";
+                        handler.sendMessage(msg);
+                        Log.d("THREAD", "LOAD COMPLETE");
+                    }
 
-                if(myInfo.get(3) != null)
-                    Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
-                else
-                    Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
-
+                    @Override
+                    public void onFailure(Call<Data> call, Throwable t) {
+                        Log.d("ERROR", t.getMessage());
+                    }
+                });
             }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-
-            }
-        });
+        }).start();
     }
 
     private void deleteDialog(){
@@ -182,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(context, "삭제에 실패", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
                         Log.d("FAIL", t.getMessage());
                         call.cancel();
                     }
@@ -200,65 +238,82 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void getUserInfo(){
+    private void getUserList(){
         userIdList.clear();
         userNameList.clear();
 
-        Call<UserList> getListInfo = apiInterface.getUserList();
-        getListInfo.enqueue(new Callback<UserList>() {
+        new Thread(new Runnable() {
             @Override
-            public void onResponse(Call<UserList> call, Response<UserList> response) {
-                if(response.isSuccessful()){
-                    Log.d("SUCCESS!/USER LIST", "SUCCESS!");
-                    UserList resultList = response.body();
-                    List<UserList.Users> usersList = resultList.data;
-                    String debugResponse = "";
+            public void run() {
+                Message msg = handler.obtainMessage();
+                Call<UserList> getListInfo = apiInterface.getUserList();
+                getListInfo.enqueue(new Callback<UserList>() {
+                    @Override
+                    public void onResponse(Call<UserList> call, Response<UserList> response) {
+                        if(response.isSuccessful()){
+                            Log.d("SUCCESS!/USER LIST", "SUCCESS!");
+                            UserList resultList = response.body();
+                            List<UserList.Users> usersList = resultList.data;
+                            String debugResponse = "";
 
-                    for(UserList.Users user : usersList){
-                        userIdList.add(user.id);
-                        userNameList.add(user.name);
-                        debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
+                            for(UserList.Users user : usersList){
+                                userIdList.add(user.id);
+                                userNameList.add(user.name);
+                                debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
+                            }
+                            Log.d("RESULT/USER LIST", debugResponse);
+                            msg.what = loadUserListComplete;
+                            msg.obj = "유저정보 불러오기 완료";
+                            handler.sendMessage(msg);
+                            Log.d("THREAD", "LOAD LIST COMPLETE");
+                        }else{
+                            Log.d("ERROR!", "ERROR!!!");
+                        }
                     }
-                    UserListAdapter userListAdapter = new UserListAdapter(MainActivity.this, userIdList, userNameList);
-                    userListAdapter.notifyDataSetChanged();
-                    mListView.setAdapter(userListAdapter);
-                    Log.d("RESULT/USER LIST", debugResponse);
-                }else{
-                    Log.d("ERROR!", "ERROR!!!");
-                }
-            }
 
-            @Override
-            public void onFailure(Call<UserList> call, Throwable t) {
-                Toast.makeText(context, "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("FAIL", t.getMessage());
-                call.cancel();
+                    @Override
+                    public void onFailure(Call<UserList> call, Throwable t) {
+                        Toast.makeText(context, "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("FAIL", t.getMessage());
+                        call.cancel();
+                    }
+                });
             }
-        });
+        }).start();
+
     }
 
     private void uploadImages(String id, String imageFile){
-        File file = new File(imageFile);
-        String serverPath = serverBasePath + id;
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
-
-        Call<Void> upload = apiInterface.uploadImage(body, id, serverPath);
-        upload.enqueue(new Callback<Void>() {
+        new Thread(new Runnable() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.d("SUCCESS", "SUCCESS");
-                Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
-                String url = serverBasePath + id;
-                Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
-            }
+            public void run() {
+                Message msg = handler.obtainMessage();
+                File file = new File(imageFile);
+                String serverPath = serverBasePath + id;
+                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(context, "업로드에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("FAIL", t.getMessage());
+                Call<Void> upload = apiInterface.uploadImage(body, id, serverPath);
+                upload.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        Log.d("SUCCESS", "SUCCESS");
+                        Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+                        String url = serverBasePath + id;
+                        msg.what = changeProfileImage;
+                        msg.obj = url;
+                        handler.sendMessage(msg);
+                        Log.d("THREAD", "UPLOAD IMAGE COMPLETE");
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "업로드에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("FAIL", t.getMessage());
+                    }
+                });
             }
-        });
+        }).start();
     }
 
     @Override

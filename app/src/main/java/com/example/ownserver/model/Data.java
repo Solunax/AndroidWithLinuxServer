@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class IdList {
+public class Data {
     @SerializedName("data")
     @Expose
     private List<String> data = null;

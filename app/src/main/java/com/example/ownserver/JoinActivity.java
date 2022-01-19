@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+
+import com.example.ownserver.model.Data;
 import com.example.ownserver.model.IdList;
 import com.example.ownserver.model.UserList;
 
@@ -83,11 +85,11 @@ public class JoinActivity extends Activity {
 
         idList.clear();
 
-        Call<IdList> getIDList = apiInterface.getUserIDs();
-        getIDList.enqueue(new Callback<IdList>() {
+        Call<Data> getIDList = apiInterface.getUserIDs();
+        getIDList.enqueue(new Callback<Data>() {
             @Override
-            public void onResponse(Call<IdList> call, Response<IdList> response) {
-                IdList result = response.body();
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                Data result = response.body();
                 String debugResponse = "";
 
                 for(String value: result.getData()){
@@ -107,8 +109,8 @@ public class JoinActivity extends Activity {
             }
 
             @Override
-            public void onFailure(Call<IdList> call, Throwable t) {
-
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.d("ERROR", t.getMessage());
             }
         });
     }

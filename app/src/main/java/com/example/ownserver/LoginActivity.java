@@ -12,6 +12,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+
+import com.example.ownserver.model.Data;
 import com.example.ownserver.model.LoginInfo;
 
 import java.util.ArrayList;
@@ -69,11 +71,11 @@ public class LoginActivity extends Activity {
     private void tryLogin(String id, String password){
         loginInfo.clear();
 
-        Call<LoginInfo> getLoginInfo = apiInterface.getLoginInfo(id);
-        getLoginInfo.enqueue(new Callback<LoginInfo>() {
+        Call<Data> getLoginInfo = apiInterface.getLoginInfo(id);
+        getLoginInfo.enqueue(new Callback<Data>() {
             @Override
-            public void onResponse(Call<LoginInfo> call, Response<LoginInfo> response) {
-                LoginInfo result = response.body();
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                Data result = response.body();
                 String debugResponse = "";
 
                 for(String value: result.getData()){
@@ -107,7 +109,7 @@ public class LoginActivity extends Activity {
             }
 
             @Override
-            public void onFailure(Call<LoginInfo> call, Throwable t) {
+            public void onFailure(Call<Data> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "에러 발생", Toast.LENGTH_SHORT).show();
             }
         });
