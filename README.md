@@ -29,4 +29,4 @@ My Practice Project
 ![1](https://user-images.githubusercontent.com/97011241/149939710-148fc859-23b5-49af-9dbd-711f5bb684df.png)  
 ![2](https://user-images.githubusercontent.com/97011241/149939716-2873258e-ab8c-4f84-b5f3-f6cc2ca24fa2.png)  
 
-- 2022/01/19 DB에 Query를 사용하는 함수들은 스레드로 처리하도록 변경, 핸들러를 통해 메인스레드의 UI 
+- 2022/01/19 DB에 Query를 사용하는 함수들은 스레드로 처리하도록 변경, 핸들러를 통해 메인스레드의 UI 수정
