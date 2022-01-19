@@ -6,7 +6,7 @@
 	$result = array();
 
 	while($row = mysqli_fetch_array($res)){
-		array_push($result, array('id'=>$row[0], 'name'=>$row[1]));
+		array_push($result, array('id'=>$row[0], 'password'=>$row[1], 'name'=>$row[2]));
 	}
 
 	header('Content-Type: application/json; charset=utf8');

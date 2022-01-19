@@ -24,3 +24,7 @@ My Practice Project
 ![1](https://user-images.githubusercontent.com/97011241/149666054-87427874-c5b7-45b2-bbc9-2e00ed5729c7.png)  
 ![2](https://user-images.githubusercontent.com/97011241/149666056-d4978914-6da1-4692-b057-be144cee8405.png)  
 ![3](https://user-images.githubusercontent.com/97011241/149666058-87696a59-e8c3-4048-b627-64b680b6909c.png)  
+
+2022/01/18 로그인ㆍ회원가입 기능 구현, UI 수정, PHP 불필요 내용 삭제 및 내용 수정, 회원정보를 불러와 해당하는 정보를 모두 표시  
+![1](https://user-images.githubusercontent.com/97011241/149939710-148fc859-23b5-49af-9dbd-711f5bb684df.png)  
+![2](https://user-images.githubusercontent.com/97011241/149939716-2873258e-ab8c-4f84-b5f3-f6cc2ca24fa2.png)  
