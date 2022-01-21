@@ -26,7 +26,7 @@
         </activity>
         <activity android:name=".MainActivity"/>
         <activity android:name=".JoinActivity"/>
-
+        <activity android:name=".Home"/>
         <activity android:name=".UpdateUserInformation"/>
         <activity android:name=".ImageUpload"/>
     </application>

@@ -96,7 +96,7 @@ public class LoginActivity extends Activity {
 
                 if(loginInfo.get(1).equals(password)){
                     Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), Home.class);
                     intent.putExtra("id", id);
                     finish();
                     startActivity(intent);
