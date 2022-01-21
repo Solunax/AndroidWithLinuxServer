@@ -16,11 +16,11 @@ import com.example.ownserver.Fragment.SettingFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class Home extends AppCompatActivity {
-    HomeFragment homeFragment = new HomeFragment();
-    SettingFragment settingFragment = new SettingFragment();
-    DummyFragment dummyFragment = new DummyFragment();
-
-    String loginId;
+    public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private HomeFragment homeFragment = new HomeFragment();
+    private SettingFragment settingFragment = new SettingFragment();
+    private DummyFragment dummyFragment = new DummyFragment();
+    private String loginId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

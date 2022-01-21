@@ -1,7 +1,7 @@
 package com.example.ownserver;
 
 import static com.example.ownserver.JoinActivity.checkNull;
-import static com.example.ownserver.MainActivity.apiInterface;
+import static com.example.ownserver.Home.apiInterface;
 
 import android.app.Activity;
 import android.content.Intent;

@@ -1,7 +1,5 @@
 package com.example.ownserver;
 
-import static com.example.ownserver.MainActivity.apiInterface;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +12,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import static com.example.ownserver.Home.apiInterface;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.IdList;
 import com.example.ownserver.model.UserList;
