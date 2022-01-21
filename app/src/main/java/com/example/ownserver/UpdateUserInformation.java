@@ -57,6 +57,7 @@ public class UpdateUserInformation extends Activity {
             Toast.makeText(this, "변경할 이름을 입력하세요", Toast.LENGTH_SHORT).show();
             return;
         }
+
         Call<UserList> updateUser = apiInterface.updateUser(id.getText().toString(), name.getText().toString());
         updateUser.enqueue(new Callback<UserList>() {
             @Override
