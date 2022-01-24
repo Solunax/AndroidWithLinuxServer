@@ -28,3 +28,7 @@ My Practice Project
 - 2022/01/18 로그인ㆍ회원가입 기능 구현, UI 수정, PHP 불필요 내용 삭제 및 내용 수정, 회원정보를 불러와 해당하는 정보를 모두 표시  
 ![1](https://user-images.githubusercontent.com/97011241/149939710-148fc859-23b5-49af-9dbd-711f5bb684df.png)  
 ![2](https://user-images.githubusercontent.com/97011241/149939716-2873258e-ab8c-4f84-b5f3-f6cc2ca24fa2.png)  
+
+- 2022/01/21 Main Activity를 Fragment로 변환 후 세가지(기존 Main Activity, Home, Dummy) Fragment를 이동할 수 있게함  
+- 기존 Main Activity의 기능은 모두 정상 작동함  
+![1](https://user-images.githubusercontent.com/97011241/150494113-fa265486-1352-48f4-b7b2-28e37ae6033b.png)
