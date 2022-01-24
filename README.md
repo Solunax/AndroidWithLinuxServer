@@ -31,4 +31,6 @@ My Practice Project
 
 - 2022/01/21 Main Activity를 Fragment로 변환 후 세가지(기존 Main Activity, Home, Dummy) Fragment를 이동할 수 있게함  
 - 기존 Main Activity의 기능은 모두 정상 작동함  
-![1](https://user-images.githubusercontent.com/97011241/150494113-fa265486-1352-48f4-b7b2-28e37ae6033b.png)
+![1](https://user-images.githubusercontent.com/97011241/150494113-fa265486-1352-48f4-b7b2-28e37ae6033b.png)  
+
+- 2022/01/24 기능적인 오류 방지를 위해 is successful 메소드를 Retrofit사용 부분에 추가함
