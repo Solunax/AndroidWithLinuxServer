@@ -33,4 +33,4 @@ My Practice Project
 - 기존 Main Activity의 기능은 모두 정상 작동함  
 ![1](https://user-images.githubusercontent.com/97011241/150494113-fa265486-1352-48f4-b7b2-28e37ae6033b.png)  
 
-- 2022/01/24 기능적인 오류 방지를 위해 is successful 메소드를 Retrofit사용 부분에 추가함
+- 2022/01/24 기존 코드에 Retrofit에서 사용되는 Enque 대신 Rxjava의 Single을 사용하도록 변경, 기존 Enque코드와 Retrofit Api Interface는 주석처리함
