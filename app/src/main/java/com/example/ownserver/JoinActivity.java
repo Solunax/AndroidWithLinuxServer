@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 import static com.example.ownserver.Home.apiInterface;
 import com.example.ownserver.model.Data;
-import com.example.ownserver.model.IdList;
 import com.example.ownserver.model.UserList;
 
 import retrofit2.Call;
@@ -88,22 +87,27 @@ public class JoinActivity extends Activity {
         getIDList.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
-                Data result = response.body();
-                String debugResponse = "";
+                if(response.isSuccessful()){
+                    Data result = response.body();
+                    String debugResponse = "";
 
-                for(String value: result.getData()){
-                    idList.add(value);
-                    debugResponse += value + " ";
-                }
-                Log.d("ID LIST", idList.toString());
-                Log.d("ID", debugResponse);
+                    for(String value: result.getData()){
+                        idList.add(value);
+                        debugResponse += value + " ";
+                    }
+                    Log.d("ID LIST", idList.toString());
+                    Log.d("ID", debugResponse);
 
-                if(idList.contains(id))
-                    Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
-                else{
-                    Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
-                    check.setEnabled(false);
-                    join.setEnabled(true);
+                    if(idList.contains(id))
+                        Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
+                    else{
+                        Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
+                        check.setEnabled(false);
+                        join.setEnabled(true);
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", "ERROR" + response.code());
                 }
             }
 
@@ -119,13 +123,18 @@ public class JoinActivity extends Activity {
         joinNew.enqueue(new Callback<UserList>() {
             @Override
             public void onResponse(Call<UserList> call, Response<UserList> response) {
-                Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                finish();
+                if(response.isSuccessful()){
+                    Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }else{
+                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", "ERROR" + response.code());
+                }
             }
 
             @Override
             public void onFailure(Call<UserList> call, Throwable t) {
-                Log.d("FAIL", "FAIL");
+                Log.d("FAIL", t.getMessage());
             }
         });
     }

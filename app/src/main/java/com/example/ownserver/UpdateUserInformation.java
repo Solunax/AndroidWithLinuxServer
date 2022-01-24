@@ -62,24 +62,29 @@ public class UpdateUserInformation extends Activity {
         updateUser.enqueue(new Callback<UserList>() {
             @Override
             public void onResponse(Call<UserList> call, Response<UserList> response) {
-                UserList resultList = response.body();
-                List<UserList.Users> usersList = resultList.data;
+                if(response.isSuccessful()){
+                    UserList resultList = response.body();
+                    List<UserList.Users> usersList = resultList.data;
 
-                for(UserList.Users user : usersList)
-                    userIdList.add(user.id);
+                    for(UserList.Users user : usersList)
+                        userIdList.add(user.id);
 
-                if(userIdList.get(0) != null){
-                    Toast.makeText(getApplicationContext(), "성공적으로 변경했습니다.", Toast.LENGTH_SHORT).show();
-                    finish();
+                    if(userIdList.get(0) != null){
+                        Toast.makeText(getApplicationContext(), "성공적으로 변경했습니다.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }else{
+                        Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
                 }else{
-                    Toast.makeText(getApplicationContext(), "추가에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", "ERROR" + response.code());
                 }
+
             }
 
             @Override
             public void onFailure(Call<UserList> call, Throwable t) {
                 Log.d("ERROR", t.getMessage());
-                call.cancel();
             }
         });
     }

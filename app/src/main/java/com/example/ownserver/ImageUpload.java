@@ -90,8 +90,14 @@ public class ImageUpload extends Activity {
         upload.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.d("SUCCESS", "SUCCESS");
-                Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+                if(response.isSuccessful()){
+                    Log.d("SUCCESS", "SUCCESS");
+                    Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", "ERROR" + response.code());
+                }
+
             }
 
             @Override
