@@ -1,5 +1,6 @@
 package com.example.ownserver;
 
+import static com.example.ownserver.Fragment.SettingFragment.disposable;
 import static com.example.ownserver.JoinActivity.checkNull;
 import static com.example.ownserver.Home.apiInterface;
 
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.ownserver.model.Data;
@@ -19,6 +21,9 @@ import com.example.ownserver.model.LoginInfo;
 
 import java.util.ArrayList;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -72,53 +77,105 @@ public class LoginActivity extends Activity {
     private void tryLogin(String id, String password){
         loginInfo.clear();
 
-        Call<Data> getLoginInfo = apiInterface.getLoginInfo(id);
-        getLoginInfo.enqueue(new Callback<Data>() {
-            @Override
-            public void onResponse(Call<Data> call, Response<Data> response) {
-                if(response.isSuccessful()){
-                    Data result = response.body();
-                    String debugResponse = "";
+        disposable.add(apiInterface.getLoginInfo(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<Data>() {
+                    @Override
+                    public void onSuccess(@NonNull Data data) {
+                            String debugResponse = "";
 
-                    for(String value: result.getData()){
-                        loginInfo.add(value);
-                        debugResponse += value + " ";
+                            for(String value: data.getData()){
+                                loginInfo.add(value);
+                                debugResponse += value + " ";
+                            }
+
+                            try{
+                                if(loginInfo.get(0).isEmpty()){
+                                    Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                                    editId.requestFocus();
+                                    return;
+                                }
+                            }catch (Exception e){
+                                Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                                editId.requestFocus();
+                                return;
+                            }
+
+                            if(loginInfo.get(1).equals(password)){
+                                Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), Home.class);
+                                intent.putExtra("id", id);
+                                finish();
+                                startActivity(intent);
+
+                            }else{
+                                Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
+                                editPassword.requestFocus();
+                                return;
+                            }
                     }
 
-                    try{
-                        if(loginInfo.get(0).isEmpty()){
-                            Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                            editId.requestFocus();
-                            return;
-                        }
-                    }catch (Exception e){
-                        Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                        editId.requestFocus();
-                        return;
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", "ERROR" + e.getMessage());
                     }
-
-                    if(loginInfo.get(1).equals(password)){
-                        Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), Home.class);
-                        intent.putExtra("id", id);
-                        finish();
-                        startActivity(intent);
-
-                    }else{
-                        Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
-                        editPassword.requestFocus();
-                        return;
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
-                    Log.d("ERROR", "ERROR" + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Data> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "에러 발생", Toast.LENGTH_SHORT).show();
-            }
-        });
+                })
+        );
     }
+
+//    Retrofit Ver
+//    private void tryLogin(String id, String password){
+//        loginInfo.clear();
+//
+//        Call<Data> getLoginInfo = apiInterface.getLoginInfo(id);
+//        getLoginInfo.enqueue(new Callback<Data>() {
+//            @Override
+//            public void onResponse(Call<Data> call, Response<Data> response) {
+//                if(response.isSuccessful()){
+//                    Data result = response.body();
+//                    String debugResponse = "";
+//
+//                    for(String value: result.getData()){
+//                        loginInfo.add(value);
+//                        debugResponse += value + " ";
+//                    }
+//
+//                    try{
+//                        if(loginInfo.get(0).isEmpty()){
+//                            Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+//                            editId.requestFocus();
+//                            return;
+//                        }
+//                    }catch (Exception e){
+//                        Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+//                        editId.requestFocus();
+//                        return;
+//                    }
+//
+//                    if(loginInfo.get(1).equals(password)){
+//                        Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
+//                        Intent intent = new Intent(getApplicationContext(), Home.class);
+//                        intent.putExtra("id", id);
+//                        finish();
+//                        startActivity(intent);
+//
+//                    }else{
+//                        Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
+//                        editPassword.requestFocus();
+//                        return;
+//                    }
+//                }else{
+//                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Data> call, Throwable t) {
+//                Toast.makeText(getApplicationContext(), "에러 발생", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
 }

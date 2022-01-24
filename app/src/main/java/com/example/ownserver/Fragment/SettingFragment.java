@@ -1,13 +1,17 @@
 package com.example.ownserver.Fragment;
 
+import static android.app.Activity.RESULT_OK;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -16,7 +20,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +35,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ownserver.ApiClient;
 import com.example.ownserver.ApiInterface;
-import com.example.ownserver.ImageUpload;
 import com.example.ownserver.R;
 import com.example.ownserver.UpdateUserInformation;
 import com.example.ownserver.UserListAdapter;
@@ -41,8 +43,11 @@ import com.example.ownserver.model.UserList;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -56,12 +61,24 @@ public class SettingFragment extends Fragment {
     private ArrayList<String> userNameList = new ArrayList<>();
     private ArrayList<String> myInfo = new ArrayList<>();
     private ListView mListView;
-    private Button getInfo, toUpdate, toDelete, toUpload;
+    private Button getInfo, toUpdate, toDelete;
     private TextView userID, userName, userAuth;
     private ImageButton img;
     private Context context;
-    private final int code = 1;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    public static CompositeDisposable disposable = new CompositeDisposable();
+
+    private ActivityResultLauncher<Intent> imageUpload = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            Log.d("RESULT", String.valueOf(result.getResultCode()));
+            if(result.getResultCode() == RESULT_OK){
+                Intent intent= result.getData();
+                String path = getPath(intent.getData());
+                uploadImages(userID.getText().toString().trim(), path);
+            }
+        }
+    });
 
     @Override
     public void onAttach(@NonNull Context cont) {
@@ -87,7 +104,6 @@ public class SettingFragment extends Fragment {
         getInfo = (Button)view.findViewById(R.id.getInfo_f);
         toUpdate = (Button)view.findViewById(R.id.toUpdateUserInfo_f);
         toDelete = (Button)view.findViewById(R.id.deleteInfo_f);
-        toUpload = (Button)view.findViewById(R.id.toUpload_f);
         img= (ImageButton)view.findViewById(R.id.profile_image_f);
 
         userID = (TextView)view.findViewById(R.id.id_f);
@@ -118,59 +134,119 @@ public class SettingFragment extends Fragment {
             }
         });
 
-        toUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, ImageUpload.class);
-                startActivity(intent);
-            }
-        });
-
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                startActivityForResult(intent, code);
+                imageUpload.launch(intent);
             }
         });
 
         return view;
     }
 
-
+//RxJava 사용버전
     private void loadUserInfo(String id){
-        Call<Data> getMyInfo = apiInterface.getMyInfo(id);
-        getMyInfo.enqueue(new Callback<Data>() {
-            @Override
-            public void onResponse(Call<Data> call, Response<Data> response) {
-                Data result = response.body();
-                String debugResponse = "";
+        disposable.add(apiInterface.getMyInfo(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<Data>() {
+                    @Override
+                    public void onSuccess(@NonNull Data data) {
+                        Log.d("SUCCESS!/USER INFO", "SUCCESS!");
+                        String debugResponse = "";
 
-                for(String value: result.getData()){
-                    myInfo.add(value);
-                    debugResponse += value + " ";
-                }
-                Log.d("VALUE", debugResponse);
+                        for(String value: data.getData()){
+                            myInfo.add(value);
+                            debugResponse += value + " ";
+                        }
+                        Log.d("VALUE", debugResponse);
 
-                userID.setText(myInfo.get(0));
-                userName.setText(myInfo.get(1));
-                if(myInfo.get(2).equals("A"))
-                    userAuth.setText("관리자");
-                else
-                    userAuth.setText("유저");
+                        userID.setText(myInfo.get(0));
+                        userName.setText(myInfo.get(1));
 
-                if(myInfo.get(3) != null)
-                    Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
-                else
-                    Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
-            }
+                        if(myInfo.get(2).equals("A"))
+                            userAuth.setText("관리자");
+                        else
+                            userAuth.setText("유저");
 
-            @Override
-            public void onFailure(Call<Data> call, Throwable t) {
-                Log.d("ERROR", t.getMessage());
-            }
-        });
+                        if(myInfo.get(3) != null)
+                            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                        else
+                            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", "ERROR" + e.getMessage());
+                    }
+                })
+        );
+    }
+
+    private void getUserList(){
+        userIdList.clear();
+        userNameList.clear();
+
+        disposable.add(apiInterface.getUserList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<UserList>() {
+                    @Override
+                    public void onSuccess(@NonNull UserList userList) {
+                        Log.d("SUCCESS!/USER LIST", "SUCCESS!");
+
+                        String debugResponse = "";
+
+                        for(UserList.Users user : userList.data){
+                            userIdList.add(user.id);
+                            userNameList.add(user.name);
+                            debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
+                        }
+                        Log.d("RESULT/USER LIST", debugResponse);
+
+                        UserListAdapter userListAdapter = new UserListAdapter(context, userIdList, userNameList);
+                        userListAdapter.notifyDataSetChanged();
+                        mListView.setAdapter(userListAdapter);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", "ERROR" + e.getMessage());
+                    }
+                })
+        );
+    }
+
+    private void uploadImages(String id, String imageFile) {
+        File file = new File(imageFile);
+        String serverPath = serverBasePath + id;
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
+
+        disposable.add(apiInterface.uploadImage(body, id, serverPath)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<Data>() {
+                    @Override
+                    public void onSuccess(@NonNull Data data) {
+                        Log.d("SUCCESS", "SUCCESS");
+                        Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+                        String url = serverBasePath + id;
+
+                        Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", "ERROR" + e.getMessage());
+                    }
+                })
+        );
     }
 
     private void deleteDialog(){
@@ -191,27 +267,47 @@ public class SettingFragment extends Fragment {
                     Toast.makeText(context, "삭제할 아이디를 입력하세요", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                // Delete User Method
-                Call<Void> deleteUser = apiInterface.deleteUser(deleteIdValue);
-                deleteUser.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(response.isSuccessful()){
-                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
-                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
-                            dialog.dismiss();
-                        }else{
-                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
-                        Log.d("FAIL", t.getMessage());
-                        call.cancel();
-                    }
-                });
+                disposable.add(apiInterface.deleteUser(deleteIdValue)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(new DisposableSingleObserver<UserList>() {
+                            @Override
+                            public void onSuccess(@NonNull UserList userList) {
+                                Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
+                                Log.d("SUCCESS!/ DELETE", "SUCCESS!");
+                                dialog.dismiss();
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+                                Log.d("ERROR", "ERROR" + e.getMessage());
+                            }
+                        })
+                );
+
+//                Delete User Method Retrofit Ver
+//                Call<Void> deleteUser = apiInterface.deleteUser(deleteIdValue);
+//                deleteUser.enqueue(new Callback<Void>() {
+//                    @Override
+//                    public void onResponse(Call<Void> call, Response<Void> response) {
+//                        if(response.isSuccessful()){
+//                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
+//                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
+//                            dialog.dismiss();
+//                        }else{
+//                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+//                            Log.d("ERROR", "ERROR" + response.code());
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<Void> call, Throwable t) {
+//                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+//                        Log.d("FAIL", t.getMessage());
+//                    }
+//                });
             }
         });
 
@@ -225,84 +321,6 @@ public class SettingFragment extends Fragment {
         dialog.show();
     }
 
-    private void getUserList(){
-        userIdList.clear();
-        userNameList.clear();
-
-        Call<UserList> getListInfo = apiInterface.getUserList();
-        getListInfo.enqueue(new Callback<UserList>() {
-            @Override
-            public void onResponse(Call<UserList> call, Response<UserList> response) {
-                if(response.isSuccessful()){
-                    Log.d("SUCCESS!/USER LIST", "SUCCESS!");
-                    UserList resultList = response.body();
-                    List<UserList.Users> usersList = resultList.data;
-                    String debugResponse = "";
-
-                    for(UserList.Users user : usersList){
-                        userIdList.add(user.id);
-                        userNameList.add(user.name);
-                        debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
-                    }
-                    Log.d("RESULT/USER LIST", debugResponse);
-
-                    UserListAdapter userListAdapter = new UserListAdapter(context, userIdList, userNameList);
-                    userListAdapter.notifyDataSetChanged();
-                    mListView.setAdapter(userListAdapter);
-                }else{
-                    Log.d("ERROR!", "ERROR!!!");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserList> call, Throwable t) {
-                Toast.makeText(context, "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                Log.d("FAIL", t.getMessage());
-                call.cancel();
-            }
-        });
-
-    }
-
-    private void uploadImages(String id, String imageFile){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File file = new File(imageFile);
-                String serverPath = serverBasePath + id;
-                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-                MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
-
-                Call<Void> upload = apiInterface.uploadImage(body, id, serverPath);
-                upload.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        Log.d("SUCCESS", "SUCCESS");
-                        Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
-                        String url = serverBasePath + id;
-
-                        Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(context, "업로드에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("FAIL", t.getMessage());
-                    }
-                });
-            }
-        }).start();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == code){
-            String path = getPath(data.getData());
-            uploadImages(userID.getText().toString().trim(), path);
-        }
-    }
-
     private String getPath(Uri uri){
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         cursor.moveToNext();
@@ -312,4 +330,116 @@ public class SettingFragment extends Fragment {
         return path;
     }
 
+// 기존 Retrofit 비동기 처리
+//    private void loadUserInfo(String id){
+//        Call<Data> getMyInfo = apiInterface.getMyInfo(id);
+//        getMyInfo.enqueue(new Callback<Data>() {
+//            @Override
+//            public void onResponse(Call<Data> call, Response<Data> response) {
+//                if(response.isSuccessful()){
+//                    Data result = response.body();
+//                    String debugResponse = "";
+//
+//                    for(String value: result.getData()){
+//                        myInfo.add(value);
+//                        debugResponse += value + " ";
+//                    }
+//                    Log.d("VALUE", debugResponse);
+//
+//                    userID.setText(myInfo.get(0));
+//                    userName.setText(myInfo.get(1));
+//
+//                    if(myInfo.get(2).equals("A"))
+//                        userAuth.setText("관리자");
+//                    else
+//                        userAuth.setText("유저");
+//
+//                    if(myInfo.get(3) != null)
+//                        Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+//                    else
+//                        Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+//                }else{
+//                    Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Data> call, Throwable t) {
+//                Log.d("ERROR", t.getMessage());
+//            }
+//        });
+//    }
+//
+//    유저 목록 불러오기
+//    private void getUserList(){
+//        userIdList.clear();
+//        userNameList.clear();
+//
+//        Call<UserList> getListInfo = apiInterface.getUserList();
+//        getListInfo.enqueue(new Callback<UserList>() {
+//            @Override
+//            public void onResponse(Call<UserList> call, Response<UserList> response) {
+//                if(response.isSuccessful()){
+//                    Log.d("SUCCESS!/USER LIST", "SUCCESS!");
+//                    UserList resultList = response.body();
+//                    List<UserList.Users> usersList = resultList.data;
+//                    String debugResponse = "";
+//
+//                    for(UserList.Users user : usersList){
+//                        userIdList.add(user.id);
+//                        userNameList.add(user.name);
+//                        debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
+//                    }
+//                    Log.d("RESULT/USER LIST", debugResponse);
+//
+//                    UserListAdapter userListAdapter = new UserListAdapter(context, userIdList, userNameList);
+//                    userListAdapter.notifyDataSetChanged();
+//                    mListView.setAdapter(userListAdapter);
+//                }else{
+//                    Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<UserList> call, Throwable t) {
+//                Toast.makeText(context, "불러오기에 실패했습니다.", Toast.LENGTH_SHORT).show();
+//                Log.d("FAIL", t.getMessage());
+//            }
+//        });
+//
+//    }
+//
+//    프로필 이미지 업로드
+//    private void uploadImages(String id, String imageFile){
+//        File file = new File(imageFile);
+//        String serverPath = serverBasePath + id;
+//        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+//        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
+//
+//        Call<Void> upload = apiInterface.uploadImage(body, id, serverPath);
+//        upload.enqueue(new Callback<Void>() {
+//            @Override
+//            public void onResponse(Call<Void> call, Response<Void> response) {
+//                if(response.isSuccessful()){
+//                    Log.d("SUCCESS", "SUCCESS");
+//                    Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
+//                    String url = serverBasePath + id;
+//
+//                    Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
+//                }else{
+//                    Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Void> call, Throwable t) {
+//                Toast.makeText(context, "업로드에 실패했습니다.", Toast.LENGTH_SHORT).show();
+//                Log.d("FAIL", t.getMessage());
+//            }
+//        });
+//    }
 }

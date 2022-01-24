@@ -8,14 +8,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import static com.example.ownserver.Fragment.SettingFragment.disposable;
 import static com.example.ownserver.Home.apiInterface;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.UserList;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -83,61 +88,125 @@ public class JoinActivity extends Activity {
 
         idList.clear();
 
-        Call<Data> getIDList = apiInterface.getUserIDs();
-        getIDList.enqueue(new Callback<Data>() {
-            @Override
-            public void onResponse(Call<Data> call, Response<Data> response) {
-                if(response.isSuccessful()){
-                    Data result = response.body();
-                    String debugResponse = "";
+        disposable.add(apiInterface.getUserIDs()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new DisposableSingleObserver<Data>() {
+               @Override
+               public void onSuccess(@NonNull Data data) {
+                   String debugResponse = "";
 
-                    for(String value: result.getData()){
-                        idList.add(value);
-                        debugResponse += value + " ";
-                    }
-                    Log.d("ID LIST", idList.toString());
-                    Log.d("ID", debugResponse);
+                   for(String value: data.getData()){
+                       idList.add(value);
+                       debugResponse += value + " ";
+                   }
+                   Log.d("ID LIST", idList.toString());
+                   Log.d("ID", debugResponse);
 
-                    if(idList.contains(id))
-                        Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
-                    else{
-                        Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
-                        check.setEnabled(false);
-                        join.setEnabled(true);
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
-                    Log.d("ERROR", "ERROR" + response.code());
-                }
-            }
+                   if(idList.contains(id))
+                       Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
+                   else{
+                       Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
+                       check.setEnabled(false);
+                       join.setEnabled(true);
+                   }
+               }
 
-            @Override
-            public void onFailure(Call<Data> call, Throwable t) {
-                Log.d("ERROR", t.getMessage());
-            }
-        });
+               @Override
+               public void onError(@NonNull Throwable e) {
+                   Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                   Log.d("ERROR", "ERROR" + e.getMessage());
+               }
+           })
+        );
     }
 
     private void joinUser(String id, String pw, String name){
-        Call<UserList> joinNew = apiInterface.insertUser(id, pw, name);
-        joinNew.enqueue(new Callback<UserList>() {
-            @Override
-            public void onResponse(Call<UserList> call, Response<UserList> response) {
-                if(response.isSuccessful()){
-                    Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                    finish();
-                }else{
-                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
-                    Log.d("ERROR", "ERROR" + response.code());
-                }
-            }
+        disposable.add(apiInterface.insertUser(id, pw, name)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<UserList>() {
+                    @Override
+                    public void onSuccess(@NonNull UserList userList) {
+                        Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
 
-            @Override
-            public void onFailure(Call<UserList> call, Throwable t) {
-                Log.d("FAIL", t.getMessage());
-            }
-        });
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", "ERROR" + e.getMessage());
+                    }
+                })
+        );
     }
+
+//    Retrofit Ver
+//    아이디 중복검사
+//    private void idChecking(String id){
+//        if(checkNull(id)){
+//            Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
+//            editId.requestFocus();
+//            return;
+//        }
+//
+//        idList.clear();
+//
+//        Call<Data> getIDList = apiInterface.getUserIDs();
+//        getIDList.enqueue(new Callback<Data>() {
+//            @Override
+//            public void onResponse(Call<Data> call, Response<Data> response) {
+//                if(response.isSuccessful()){
+//                    Data result = response.body();
+//                    String debugResponse = "";
+//
+//                    for(String value: result.getData()){
+//                        idList.add(value);
+//                        debugResponse += value + " ";
+//                    }
+//                    Log.d("ID LIST", idList.toString());
+//                    Log.d("ID", debugResponse);
+//
+//                    if(idList.contains(id))
+//                        Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
+//                    else{
+//                        Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
+//                        check.setEnabled(false);
+//                        join.setEnabled(true);
+//                    }
+//                }else{
+//                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Data> call, Throwable t) {
+//                Log.d("ERROR", t.getMessage());
+//            }
+//        });
+//    }
+//    회원가입
+//    private void joinUser(String id, String pw, String name){
+//        Call<UserList> joinNew = apiInterface.insertUser(id, pw, name);
+//        joinNew.enqueue(new Callback<UserList>() {
+//            @Override
+//            public void onResponse(Call<UserList> call, Response<UserList> response) {
+//                if(response.isSuccessful()){
+//                    Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
+//                    finish();
+//                }else{
+//                    Toast.makeText(getApplicationContext(), "에러 발생!", Toast.LENGTH_SHORT).show();
+//                    Log.d("ERROR", "ERROR" + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<UserList> call, Throwable t) {
+//                Log.d("FAIL", t.getMessage());
+//            }
+//        });
+//    }
 
     public static Boolean checkNull(String value){
         if(value.isEmpty())
