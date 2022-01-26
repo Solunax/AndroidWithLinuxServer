@@ -35,4 +35,4 @@ My Practice Project
 
 - 2022/01/24 기존 코드에 Retrofit에서 사용되는 Enque 대신 Rxjava의 Single을 사용하도록 변경, 기존 Enque코드와 Retrofit Api Interface는 주석처리함  
 
-- 2022/01/26 로그인시 SavePreference를 이용, 회원 정보저장에 체크하고 로그인 후 다시 앱을 실행하면 저장된 정보를 불러와 로그인 정보를  
+- 2022/01/26 로그인시 SavePreference를 이용, 회원 정보저장에 체크하고 로그인 후 다시 앱을 실행하면 저장된 정보를 불러와 로그인 정보를 기입함
