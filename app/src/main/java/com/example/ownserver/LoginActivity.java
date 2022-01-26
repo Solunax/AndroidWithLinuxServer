@@ -10,16 +10,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ownserver.SharedPreference.SavedUserInformation;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.LoginInfo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -28,10 +33,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends AppCompatActivity {
     private Button login, join;
     private EditText editId, editPassword;
+    private String savedId, savedPw;
+    private Boolean savedState;
+    private CheckBox saveInformation;
     private ArrayList<String> loginInfo = new ArrayList<>();
+    private Map<String, String> savedUserInfo = new HashMap<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +52,20 @@ public class LoginActivity extends Activity {
 
         login = (Button)findViewById(R.id.login);
         join = (Button)findViewById(R.id.join);
+
+        saveInformation = (CheckBox)findViewById(R.id.save_login_information);
+
+        savedUserInfo = SavedUserInformation.getUserInformation(this);
+        Log.d("ABC", savedUserInfo.toString());
+        savedId = savedUserInfo.get("id");
+        savedPw = savedUserInfo.get("password");
+        savedState = Boolean.valueOf(savedUserInfo.get("state"));
+
+        if(savedState){
+            editId.setText(savedId);
+            editPassword.setText(savedPw);
+            saveInformation.setChecked(true);
+        }
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,6 +128,13 @@ public class LoginActivity extends Activity {
                             if(loginInfo.get(1).equals(password)){
                                 Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), Home.class);
+
+                                if(saveInformation.isChecked())
+                                    SavedUserInformation.setUserInformation(getApplicationContext(), editId.getText().toString().trim(), editPassword.getText().toString().trim(), "true");
+                                else{
+                                    SavedUserInformation.deleteUserInformation(getApplicationContext());
+                                }
+
                                 intent.putExtra("id", id);
                                 finish();
                                 startActivity(intent);
