@@ -8,6 +8,7 @@ import com.example.ownserver.model.UserList;
 
 import io.reactivex.Single;
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
