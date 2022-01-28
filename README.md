@@ -4,7 +4,7 @@ My Practice Project
 개인 공부를 위한 리눅스 서버 기반의 안드로이드 프로그램  
 - Apache2, Mysql, PHP, Android Studio 사용  
 - Java 사용  
-- Retrofit2, GLIDE 사용  
+- Retrofit2, GLIDE, RxJava, Jsoup 사용  
 
 - 2022/01/10 Local 리눅스 서버 구축(VirtualBox) 및 DB Setting, PHP를 사용한 GET 구현(사용자 목록)  
 ![1](https://user-images.githubusercontent.com/97011241/148894536-4278cb30-8635-439c-b802-d26ecce9388f.png)
@@ -35,4 +35,7 @@ My Practice Project
 
 - 2022/01/24 기존 코드에 Retrofit에서 사용되는 Enque 대신 Rxjava의 Single을 사용하도록 변경, 기존 Enque코드와 Retrofit Api Interface는 주석처리함  
 
-- 2022/01/26 로그인시 SavePreference를 이용, 회원 정보저장에 체크하고 로그인 후 다시 앱을 실행하면 저장된 정보를 불러와 로그인 정보를 기입함
+- 2022/01/26 로그인시 SavePreference를 이용, 회원 정보저장에 체크하고 로그인 후 다시 앱을 실행하면 저장된 정보를 불러와 로그인 정보를 기입함  
+
+- 2022/01/28 서버에 phpinfo를 불러와서 몇개의 정보를 파싱하여 홈 화면에 띄워줌, Jsoup 사용  
+![1](https://user-images.githubusercontent.com/97011241/151493107-681b022f-3293-4d03-9f9d-485bee2f4616.png)
