@@ -3,8 +3,8 @@ My Practice Project
 
 개인 공부를 위한 리눅스 서버 기반의 안드로이드 프로그램  
 - Apache2, Mysql, PHP, Android Studio 사용  
-- Java 사용  
-- Retrofit2, GLIDE, RxJava, Jsoup 사용  
+- 개발언어 Java 사용  
+- Retrofit2, GLIDE, RxJava, Jsoup, DataBinding 사용  
 
 - 2022/01/10 Local 리눅스 서버 구축(VirtualBox) 및 DB Setting, PHP를 사용한 GET 구현(사용자 목록)  
 ![1](https://user-images.githubusercontent.com/97011241/148894536-4278cb30-8635-439c-b802-d26ecce9388f.png)
@@ -40,6 +40,6 @@ My Practice Project
 - 2022/01/28 서버에 phpinfo를 불러와서 몇개의 정보를 파싱하여 홈 화면에 띄워줌, Jsoup 사용  
 ![1](https://user-images.githubusercontent.com/97011241/151493107-681b022f-3293-4d03-9f9d-485bee2f4616.png)  
 
-- 2022/02/03 Rxjava의 clear 메소드를 이용하여 메모리 누수 방지, View Model을 사용하여 Fragment간 데이터 전달  
+- 2022/02/03 Rxjava의 clear 메소드를 이용하여 메모리 누수 방지, View Model을 사용하여 Fragment간 데이터 전달, Fragment에 Data Binding을 사용
 ![1](https://user-images.githubusercontent.com/97011241/152279726-5715c7d0-a0d8-44d2-84eb-1113cc6524e7.png)
 
