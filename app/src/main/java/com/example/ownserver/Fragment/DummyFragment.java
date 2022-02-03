@@ -14,7 +14,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ownserver.R;
+import com.example.ownserver.databinding.DummyFragmentBinding;
 import com.example.ownserver.model.HomeViewModel;
+import com.example.ownserver.model.UserModel;
 
 import java.util.ArrayList;
 
@@ -23,6 +25,7 @@ public class DummyFragment extends Fragment {
     private TextView id, name, auth;
     private HomeViewModel viewModel;
     private ArrayList<String> fragmentValue = new ArrayList<>();
+    private DummyFragmentBinding binding;
 
     @Override
     public void onAttach(@NonNull Context cont) {
@@ -41,19 +44,17 @@ public class DummyFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dummy_fragment, container, false);
-
-        id = (TextView)view.findViewById(R.id.fragment_id);
-        name = (TextView)view.findViewById(R.id.fragment_name);
-        auth = (TextView)view.findViewById(R.id.fragment_auth);
+        binding = DummyFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         fragmentValue = viewModel.getViewModelList().getValue();
 
         if(!(fragmentValue == null)){
-            id.setText(fragmentValue.get(0));
-            name.setText(fragmentValue.get(1));
-            auth.setText(fragmentValue.get(2));
+            UserModel user = new UserModel(fragmentValue.get(0), fragmentValue.get(1), fragmentValue.get(2));
+            binding.setUser(user);
+        }else{
+            Log.d("VALUE", "NULL");
         }
         return view;
     }

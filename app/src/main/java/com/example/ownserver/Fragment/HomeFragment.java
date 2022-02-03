@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ownserver.R;
 import com.example.ownserver.Home;
+import com.example.ownserver.databinding.HomeFragmentBinding;
+import com.example.ownserver.model.ParsingModel;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,6 +30,7 @@ public class HomeFragment extends Fragment {
     private TextView name, serverApi, phpApi, buildDate;
     private String URL = "http://192.168.56.117/serverInfo.php";
     private Context context;
+    private HomeFragmentBinding binding;
     private HashMap<String, String> infoValues = new HashMap<>();
 
     @Override
@@ -44,15 +47,25 @@ public class HomeFragment extends Fragment {
         Log.d("DETACH", "HOME");
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d("DESTROY VIEW", "HOME");
+        binding = null;
+    }
+
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
             switch (message.what){
                 case 1:
-                    name.setText(infoValues.get("name"));
-                    buildDate.setText(infoValues.get("date"));
-                    serverApi.setText(infoValues.get("serverAPI"));
-                    phpApi.setText(infoValues.get("phpAPI"));
+                    ParsingModel data = new ParsingModel(infoValues.get("name"), infoValues.get("date"),
+                            infoValues.get("serverAPI"), infoValues.get("phpAPI"));
+//                    name.setText(infoValues.get("name"));
+//                    buildDate.setText(infoValues.get("date"));
+//                    serverApi.setText(infoValues.get("serverAPI"));
+//                    phpApi.setText(infoValues.get("phpAPI"));
+                    binding.setData(data);
                     break;
             }
             return true;
@@ -62,12 +75,8 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.home_fragment, container, false);
-
-        name = (TextView)view.findViewById(R.id.system_name);
-        serverApi = (TextView)view.findViewById(R.id.server_api);
-        phpApi = (TextView)view.findViewById(R.id.php_api);
-        buildDate = (TextView)view.findViewById(R.id.build_date);
+        binding = HomeFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
         getServerInformation();
 

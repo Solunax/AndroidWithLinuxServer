@@ -8,6 +8,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -39,9 +41,12 @@ import com.example.ownserver.ApiInterface;
 import com.example.ownserver.R;
 import com.example.ownserver.UpdateUserInformation;
 import com.example.ownserver.UserListAdapter;
+import com.example.ownserver.databinding.SettingFragmentBinding;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.HomeViewModel;
+import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
+import com.example.ownserver.model.UserModel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -68,6 +73,7 @@ public class SettingFragment extends Fragment {
     private ImageButton img;
     private Context context;
     private HomeViewModel viewModel;
+    private SettingFragmentBinding binding;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
     public static CompositeDisposable disposable = new CompositeDisposable();
 
@@ -78,7 +84,7 @@ public class SettingFragment extends Fragment {
                 if(result.getResultCode() == RESULT_OK){
                     Intent intent= result.getData();
                     String path = getPath(intent.getData());
-                    uploadImages(userID.getText().toString().trim(), path);
+                    uploadImages(binding.idF.getText().toString().trim(), path);
             }
         }
     });
@@ -99,37 +105,34 @@ public class SettingFragment extends Fragment {
         disposable.clear();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d("DESTROY VIEW", "SETTING");
+        binding = null;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.setting_fragment, container, false);
+        binding = SettingFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         Bundle bundle = getArguments();
         String loginId = bundle.getString("id");
-
-        mListView = (ListView)view.findViewById(R.id.infoList_f);
-
-        getInfo = (Button)view.findViewById(R.id.getInfo_f);
-        toUpdate = (Button)view.findViewById(R.id.toUpdateUserInfo_f);
-        toDelete = (Button)view.findViewById(R.id.deleteInfo_f);
-        img= (ImageButton)view.findViewById(R.id.profile_image_f);
-
-        userID = (TextView)view.findViewById(R.id.id_f);
-        userName = (TextView)view.findViewById(R.id.name_f);
-        userAuth = (TextView)view.findViewById(R.id.auth_f);
 
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         viewModel.getViewModelList();
 
         loadUserInfo(loginId);
 
-        getInfo.setOnClickListener(new View.OnClickListener() {
+        binding.getInfoF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getUserList();
             }
         });
 
-        toUpdate.setOnClickListener(new View.OnClickListener() {
+        binding.toUpdateUserInfoF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, UpdateUserInformation.class);
@@ -137,14 +140,14 @@ public class SettingFragment extends Fragment {
             }
         });
 
-        toDelete.setOnClickListener(new View.OnClickListener() {
+        binding.deleteInfoF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 deleteDialog();
             }
         });
 
-        img.setOnClickListener(new View.OnClickListener() {
+        binding.profileImageF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -173,18 +176,19 @@ public class SettingFragment extends Fragment {
                         }
                         Log.d("VALUE", debugResponse);
 
-                        userID.setText(myInfo.get(0));
-                        userName.setText(myInfo.get(1));
-
+                        String auth;
                         if(myInfo.get(2).equals("A"))
-                            userAuth.setText("관리자");
+                            auth = "관리자";
                         else
-                            userAuth.setText("유저");
+                            auth = "유저";
+
+                        UserModel user = new UserModel(myInfo.get(0), myInfo.get(1), auth);
+                        binding.setUser(user);
 
                         if(myInfo.get(3) != null)
-                            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
                         else
-                            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+                            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
 
                         viewModel.setInfoList(myInfo);
                     }
@@ -221,7 +225,7 @@ public class SettingFragment extends Fragment {
 
                         UserListAdapter userListAdapter = new UserListAdapter(context, userIdList, userNameList);
                         userListAdapter.notifyDataSetChanged();
-                        mListView.setAdapter(userListAdapter);
+                        binding.infoListF.setAdapter(userListAdapter);
                     }
 
                     @Override
@@ -249,7 +253,7 @@ public class SettingFragment extends Fragment {
                         Toast.makeText(context, "업로드에 성공했습니다.", Toast.LENGTH_SHORT).show();
                         String url = serverBasePath + id;
 
-                        Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(img);
+                        Glide.with(context).load(url).circleCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(binding.profileImageF);
                     }
 
                     @Override
@@ -341,6 +345,7 @@ public class SettingFragment extends Fragment {
 
         return path;
     }
+
 
 // 기존 Retrofit 비동기 처리
 //    private void loadUserInfo(String id){
