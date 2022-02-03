@@ -34,7 +34,7 @@ public class HomeFragment extends Fragment {
     public void onAttach(@NonNull Context ct) {
         super.onAttach(ct);
         context = getContext();
-        Log.d("ATTACH", "HOMES");
+        Log.d("ATTACH", "HOME");
     }
 
     @Override
