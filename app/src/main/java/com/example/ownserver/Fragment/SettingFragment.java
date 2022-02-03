@@ -87,7 +87,7 @@ public class SettingFragment extends Fragment {
     public void onAttach(@NonNull Context cont) {
         super.onAttach(cont);
         context = getContext();
-        Log.d("ATTACH", "SETTING");
+        Log.d("ATTACH", "SETTINGS");
 
     }
 
