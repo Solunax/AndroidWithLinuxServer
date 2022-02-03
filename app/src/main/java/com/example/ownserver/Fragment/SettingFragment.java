@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -39,6 +40,7 @@ import com.example.ownserver.R;
 import com.example.ownserver.UpdateUserInformation;
 import com.example.ownserver.UserListAdapter;
 import com.example.ownserver.model.Data;
+import com.example.ownserver.model.HomeViewModel;
 import com.example.ownserver.model.UserList;
 
 import java.io.File;
@@ -65,6 +67,7 @@ public class SettingFragment extends Fragment {
     private TextView userID, userName, userAuth;
     private ImageButton img;
     private Context context;
+    private HomeViewModel viewModel;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
     public static CompositeDisposable disposable = new CompositeDisposable();
 
@@ -72,10 +75,10 @@ public class SettingFragment extends Fragment {
         @Override
         public void onActivityResult(ActivityResult result) {
             Log.d("RESULT", String.valueOf(result.getResultCode()));
-            if(result.getResultCode() == RESULT_OK){
-                Intent intent= result.getData();
-                String path = getPath(intent.getData());
-                uploadImages(userID.getText().toString().trim(), path);
+                if(result.getResultCode() == RESULT_OK){
+                    Intent intent= result.getData();
+                    String path = getPath(intent.getData());
+                    uploadImages(userID.getText().toString().trim(), path);
             }
         }
     });
@@ -84,12 +87,16 @@ public class SettingFragment extends Fragment {
     public void onAttach(@NonNull Context cont) {
         super.onAttach(cont);
         context = getContext();
+        Log.d("ATTACH", "SETTING");
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         context = null;
+        Log.d("DETACH", "SETTING");
+        disposable.clear();
     }
 
     @Nullable
@@ -109,6 +116,9 @@ public class SettingFragment extends Fragment {
         userID = (TextView)view.findViewById(R.id.id_f);
         userName = (TextView)view.findViewById(R.id.name_f);
         userAuth = (TextView)view.findViewById(R.id.auth_f);
+
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        viewModel.getViewModelList();
 
         loadUserInfo(loginId);
 
@@ -175,6 +185,8 @@ public class SettingFragment extends Fragment {
                             Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
                         else
                             Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(img);
+
+                        viewModel.setInfoList(myInfo);
                     }
 
                     @Override

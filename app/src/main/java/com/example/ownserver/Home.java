@@ -1,7 +1,10 @@
 package com.example.ownserver;
 
+import static com.example.ownserver.Fragment.SettingFragment.disposable;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -9,11 +12,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ownserver.Fragment.DummyFragment;
 import com.example.ownserver.Fragment.HomeFragment;
 import com.example.ownserver.Fragment.SettingFragment;
+import com.example.ownserver.model.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.HashMap;
 
 public class Home extends AppCompatActivity {
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
@@ -21,6 +29,19 @@ public class Home extends AppCompatActivity {
     private SettingFragment settingFragment = new SettingFragment();
     private DummyFragment dummyFragment = new DummyFragment();
     private String loginId;
+    public HomeViewModel homeViewModel;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("DESTROY", "HOME");
+        disposable.dispose();
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,6 +50,8 @@ public class Home extends AppCompatActivity {
 
         Intent beforeData = getIntent();
         loginId = beforeData.getStringExtra("id");
+
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         settingFragment = new SettingFragment();
 

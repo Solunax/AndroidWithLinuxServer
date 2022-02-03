@@ -43,6 +43,12 @@ public class LoginActivity extends AppCompatActivity {
     private Map<String, String> savedUserInfo = new HashMap<>();
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.clear();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
@@ -136,6 +142,7 @@ public class LoginActivity extends AppCompatActivity {
                                 }
 
                                 intent.putExtra("id", id);
+
                                 finish();
                                 startActivity(intent);
 

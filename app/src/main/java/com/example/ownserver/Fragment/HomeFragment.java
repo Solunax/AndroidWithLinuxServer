@@ -1,8 +1,5 @@
 package com.example.ownserver.Fragment;
 
-import static com.example.ownserver.Fragment.SettingFragment.apiInterface;
-import static com.example.ownserver.Fragment.SettingFragment.disposable;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,27 +9,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.ownserver.R;
-import com.example.ownserver.model.Data;
+import com.example.ownserver.Home;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
 
 public class HomeFragment extends Fragment {
     private TextView name, serverApi, phpApi, buildDate;
@@ -44,12 +34,14 @@ public class HomeFragment extends Fragment {
     public void onAttach(@NonNull Context ct) {
         super.onAttach(ct);
         context = getContext();
+        Log.d("ATTACH", "HOME");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         context = null;
+        Log.d("DETACH", "HOME");
     }
 
     Handler handler = new Handler(new Handler.Callback() {
