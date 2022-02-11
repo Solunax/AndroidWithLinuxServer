@@ -41,5 +41,7 @@ My Practice Project
 ![1](https://user-images.githubusercontent.com/97011241/151493107-681b022f-3293-4d03-9f9d-485bee2f4616.png)  
 
 - 2022/02/03 Rxjava의 clear 메소드를 이용하여 메모리 누수 방지, View Model을 사용하여 Fragment간 데이터 전달, Fragment에 Data Binding을 사용
-![1](https://user-images.githubusercontent.com/97011241/152279726-5715c7d0-a0d8-44d2-84eb-1113cc6524e7.png)
+![1](https://user-images.githubusercontent.com/97011241/152279726-5715c7d0-a0d8-44d2-84eb-1113cc6524e7.png)  
+
+- 2022/02/11 Databinding을 더 많은 Activity에 적용, Android에서 Deprecated된 메소드들을 수정함
 
