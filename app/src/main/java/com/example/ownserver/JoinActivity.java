@@ -15,6 +15,8 @@ import java.util.ArrayList;
 
 import static com.example.ownserver.Fragment.SettingFragment.disposable;
 import static com.example.ownserver.Home.apiInterface;
+
+import com.example.ownserver.databinding.JoinActivityBinding;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.UserList;
 
@@ -26,51 +28,44 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class JoinActivity extends Activity {
-    private Button join, check;
-    private EditText editId, editPassword, editName;
     private ArrayList<String>idList= new ArrayList<>();
+    private JoinActivityBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.join_activity);
+        binding = JoinActivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        editId = (EditText)findViewById(R.id.join_userID);
-        editPassword = (EditText)findViewById(R.id.join_userPW);
-        editName = (EditText)findViewById(R.id.join_userName);
-
-        join = (Button)findViewById(R.id.join_complete);
-        check = (Button)findViewById(R.id.id_check);
-
-        check.setOnClickListener(new View.OnClickListener() {
+        binding.idCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                idChecking(editId.getText().toString().trim());
+                idChecking(binding.joinUserID.getText().toString().trim());
             }
         });
 
-        join.setOnClickListener(new View.OnClickListener() {
+        binding.joinComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id = editId.getText().toString().trim();
-                String password = editPassword.getText().toString().trim();
-                String name = editName.getText().toString().trim();
+                String id = binding.joinUserID.getText().toString().trim();
+                String password = binding.joinUserPW.getText().toString().trim();
+                String name = binding.joinUserName.getText().toString().trim();
 
                 if(checkNull(id)){
                     Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-                    editId.requestFocus();
+                    binding.joinUserID.requestFocus();
                     return;
                 }
 
                 if(checkNull(password)){
                     Toast.makeText(getApplicationContext(), "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
-                    editPassword.requestFocus();
+                    binding.joinUserPW.requestFocus();
                     return;
                 }
 
                 if(checkNull(name)){
                     Toast.makeText(getApplicationContext(), "이름을 입력하세요", Toast.LENGTH_SHORT).show();
-                    editName.requestFocus();
+                    binding.joinUserName.requestFocus();
                     return;
                 }
 
@@ -82,7 +77,7 @@ public class JoinActivity extends Activity {
     private void idChecking(String id){
         if(checkNull(id)){
             Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-            editId.requestFocus();
+            binding.joinUserID.requestFocus();
             return;
         }
 
@@ -107,8 +102,8 @@ public class JoinActivity extends Activity {
                        Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
                    else{
                        Toast.makeText(getApplicationContext(), "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
-                       check.setEnabled(false);
-                       join.setEnabled(true);
+                       binding.idCheck.setEnabled(false);
+                       binding.joinComplete.setEnabled(true);
                    }
                }
 

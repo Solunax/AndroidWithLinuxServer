@@ -18,8 +18,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.ownserver.Fragment.DummyFragment;
 import com.example.ownserver.Fragment.HomeFragment;
 import com.example.ownserver.Fragment.SettingFragment;
+import com.example.ownserver.databinding.MainScreenBinding;
 import com.example.ownserver.model.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.HashMap;
 
@@ -30,6 +32,7 @@ public class Home extends AppCompatActivity {
     private DummyFragment dummyFragment = new DummyFragment();
     private String loginId;
     public HomeViewModel homeViewModel;
+    private MainScreenBinding binding;
 
     @Override
     protected void onPause() {
@@ -46,20 +49,18 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_screen);
+        binding = MainScreenBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         Intent beforeData = getIntent();
         loginId = beforeData.getStringExtra("id");
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        settingFragment = new SettingFragment();
-
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_container, homeFragment).commitAllowingStateLoss();
+        fragmentManager.beginTransaction().replace(R.id.fragment_container, homeFragment).commit();
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_menu);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        binding.bottomMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -80,8 +81,10 @@ public class Home extends AppCompatActivity {
                         transaction.replace(R.id.fragment_container, settingFragment).commitAllowingStateLoss();
                         return true;
                 }
+
                 return false;
             }
         });
+
     }
 }
