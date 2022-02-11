@@ -2,6 +2,7 @@ package com.example.ownserver;
 
 import static com.example.ownserver.Fragment.SettingFragment.disposable;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
@@ -57,34 +59,47 @@ public class Home extends AppCompatActivity {
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
+        Bundle bundle = new Bundle();
+        bundle.putString("id", loginId);
+        settingFragment.setArguments(bundle);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_container, homeFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
+        fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
 
         binding.bottomMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right, R.anim.enter_from_right, R.anim.exit_to_right);
                 switch (item.getItemId()){
                     case R.id.dummy:
-                        transaction.replace(R.id.fragment_container, dummyFragment).commitAllowingStateLoss();
+                        changeFragment(transaction, "dummy");
                         return true;
 
                     case R.id.main:
-                        transaction.replace(R.id.fragment_container, homeFragment).commitAllowingStateLoss();
+                        changeFragment(transaction, "main");
                         return true;
 
                     case R.id.setting:
-                        Bundle bundle = new Bundle();
-                        bundle.putString("id", loginId);
-                        settingFragment.setArguments(bundle);
-                        transaction.replace(R.id.fragment_container, settingFragment).commitAllowingStateLoss();
+                        changeFragment(transaction, "setting");
                         return true;
                 }
-
                 return false;
             }
         });
 
+    }
+
+    private void changeFragment(FragmentTransaction transaction, String fragmentName){
+        if(fragmentName.equals("dummy")) {
+            transaction.detach(dummyFragment).attach(dummyFragment).commitNow();
+            transaction.show(dummyFragment).hide(homeFragment).hide(settingFragment).commitAllowingStateLoss();
+        }
+        else if(fragmentName.equals("main"))
+            transaction.show(homeFragment).hide(dummyFragment).hide(settingFragment).commitAllowingStateLoss();
+        else if(fragmentName.equals("setting"))
+            transaction.show(settingFragment).hide(homeFragment).hide(dummyFragment).commitAllowingStateLoss();
     }
 }

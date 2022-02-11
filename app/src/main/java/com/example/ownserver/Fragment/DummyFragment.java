@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ownserver.R;
@@ -44,6 +45,7 @@ public class DummyFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d("CreateView", "dummy");
         binding = DummyFragmentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
@@ -54,8 +56,9 @@ public class DummyFragment extends Fragment {
             UserModel user = new UserModel(fragmentValue.get(0), fragmentValue.get(1), fragmentValue.get(2));
             binding.setUser(user);
         }else{
-            Log.d("VALUE", "NULL");
+            Log.d("DUMMY VALUE", "NULL");
         }
+
         return view;
     }
 }

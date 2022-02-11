@@ -189,7 +189,7 @@ public class SettingFragment extends Fragment {
                             Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
                         else
                             Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
-
+                        Log.d("SETTING", "SET VIEW MODEL");
                         viewModel.setInfoList(myInfo);
                     }
 
