@@ -43,4 +43,7 @@ My Practice Project
 - 2022/02/03 Rxjava의 clear 메소드를 이용하여 메모리 누수 방지, View Model을 사용하여 Fragment간 데이터 전달, Fragment에 Data Binding을 사용
 ![1](https://user-images.githubusercontent.com/97011241/152279726-5715c7d0-a0d8-44d2-84eb-1113cc6524e7.png)  
 
-- 2022/02/11 Databinding을 더 많은 Activity에 적용, Android에서 Deprecated된 메소드들을 수정함, Fragment의 불필요한 로딩(replace 방식)을 개선하여 불필요한 로딩 최소화
+- 2022/02/11 Databinding을 더 많은 Activity에 적용, Android에서 Deprecated된 메소드들을 수정함, Fragment의 불필요한 로딩(replace 방식)을 개선하여 불필요한 로딩 최소화  
+
+- 2022/02/14 화면 회전시 다른 Layout이 표시되도록 변경, 화면이 회전되서 on Destroy가 호출되어도 사용자가 마지막에 위치한 Fragment를 유지, View Model을 사용하여 서버와 통신한 데이터를 저장하고 on Destroy 호출 후 Activity 재 생성시 불필요한 서버 통신을 최소화
+![1](https://user-images.githubusercontent.com/97011241/153829573-5a7bbd97-053b-47ee-8a2f-a5a662c002fd.png)
