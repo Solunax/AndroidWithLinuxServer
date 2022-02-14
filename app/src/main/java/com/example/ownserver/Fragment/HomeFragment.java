@@ -8,14 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.ownserver.R;
-import com.example.ownserver.Home;
 import com.example.ownserver.databinding.HomeFragmentBinding;
 import com.example.ownserver.model.ParsingModel;
 
@@ -27,7 +24,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class HomeFragment extends Fragment {
-    private TextView name, serverApi, phpApi, buildDate;
     private String URL = "http://192.168.56.117/serverInfo.php";
     private Context context;
     private HomeFragmentBinding binding;
@@ -59,12 +55,7 @@ public class HomeFragment extends Fragment {
         public boolean handleMessage(@NonNull Message message) {
             switch (message.what){
                 case 1:
-                    ParsingModel data = new ParsingModel(infoValues.get("name"), infoValues.get("date"),
-                            infoValues.get("serverAPI"), infoValues.get("phpAPI"));
-//                    name.setText(infoValues.get("name"));
-//                    buildDate.setText(infoValues.get("date"));
-//                    serverApi.setText(infoValues.get("serverAPI"));
-//                    phpApi.setText(infoValues.get("phpAPI"));
+                    ParsingModel data = new ParsingModel(infoValues.get("name"), infoValues.get("date"), infoValues.get("serverAPI"), infoValues.get("phpAPI"));
                     binding.setData(data);
                     break;
             }

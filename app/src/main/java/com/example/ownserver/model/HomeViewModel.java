@@ -21,7 +21,6 @@ public class HomeViewModel extends ViewModel {
         return infoList;
     }
 
-
     public void setInfoList(ArrayList<String> values){
         infoList.setValue(values);
         Log.d("INFO", infoList.getValue().toString());

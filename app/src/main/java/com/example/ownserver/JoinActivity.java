@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,7 +11,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
-import static com.example.ownserver.Fragment.SettingFragment.disposable;
+import static com.example.ownserver.Home.disposable;
 import static com.example.ownserver.Home.apiInterface;
 
 import com.example.ownserver.databinding.JoinActivityBinding;
@@ -23,9 +21,6 @@ import com.example.ownserver.model.UserList;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class JoinActivity extends Activity {
     private ArrayList<String>idList= new ArrayList<>();

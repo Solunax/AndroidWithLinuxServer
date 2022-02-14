@@ -1,8 +1,5 @@
 package com.example.ownserver;
 
-import static com.example.ownserver.Fragment.SettingFragment.disposable;
-
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ownserver.Fragment.DummyFragment;
@@ -22,10 +18,11 @@ import com.example.ownserver.Fragment.HomeFragment;
 import com.example.ownserver.Fragment.SettingFragment;
 import com.example.ownserver.databinding.MainScreenBinding;
 import com.example.ownserver.model.HomeViewModel;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
-import java.util.HashMap;
+import java.util.List;
+
+import io.reactivex.disposables.CompositeDisposable;
 
 public class Home extends AppCompatActivity {
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
@@ -35,6 +32,12 @@ public class Home extends AppCompatActivity {
     private String loginId;
     public HomeViewModel homeViewModel;
     private MainScreenBinding binding;
+    public final int DUMMY_SEQUENCE = 0;
+    public final int MAIN_SEQUENCE = 1;
+    public final int SETTING_SEQUENCE = 2;
+    public static int sequence = 1;
+    public static CompositeDisposable disposable  = new CompositeDisposable();
+    private FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onPause() {
@@ -44,15 +47,21 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("DESTROY", "HOME");
+        Log.d("DESTROY", "HOME ACTIVITY");
+        for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++)
+            fragmentManager.popBackStack();
         disposable.dispose();
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("HOME", "on Create");
+
         binding = MainScreenBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        disposable  = new CompositeDisposable();
 
         Intent beforeData = getIntent();
         loginId = beforeData.getStringExtra("id");
@@ -63,10 +72,21 @@ public class Home extends AppCompatActivity {
         bundle.putString("id", loginId);
         settingFragment.setArguments(bundle);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
-        fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
+        if(sequence == MAIN_SEQUENCE){
+            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
+            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
+            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
+        }
+        if(sequence == DUMMY_SEQUENCE){
+            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
+            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
+            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy").commitNow();
+        }
+        if(sequence == SETTING_SEQUENCE){
+            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
+            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
+            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
+        }
 
         binding.bottomMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -89,17 +109,21 @@ public class Home extends AppCompatActivity {
                 return false;
             }
         });
-
     }
 
     private void changeFragment(FragmentTransaction transaction, String fragmentName){
         if(fragmentName.equals("dummy")) {
             transaction.detach(dummyFragment).attach(dummyFragment).commitNow();
             transaction.show(dummyFragment).hide(homeFragment).hide(settingFragment).commitAllowingStateLoss();
+            sequence = DUMMY_SEQUENCE;
         }
-        else if(fragmentName.equals("main"))
+        else if(fragmentName.equals("main")){
             transaction.show(homeFragment).hide(dummyFragment).hide(settingFragment).commitAllowingStateLoss();
-        else if(fragmentName.equals("setting"))
+            sequence = MAIN_SEQUENCE;
+        }
+        else if(fragmentName.equals("setting")){
             transaction.show(settingFragment).hide(homeFragment).hide(dummyFragment).commitAllowingStateLoss();
+            sequence = SETTING_SEQUENCE;
+        }
     }
 }

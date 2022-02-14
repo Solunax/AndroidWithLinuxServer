@@ -1,6 +1,7 @@
 package com.example.ownserver.Fragment;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.ownserver.Home.disposable;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -8,8 +9,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -44,7 +43,6 @@ import com.example.ownserver.UserListAdapter;
 import com.example.ownserver.databinding.SettingFragmentBinding;
 import com.example.ownserver.model.Data;
 import com.example.ownserver.model.HomeViewModel;
-import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
 import com.example.ownserver.model.UserModel;
 
@@ -52,30 +50,21 @@ import java.io.File;
 import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SettingFragment extends Fragment {
     private String serverBasePath = "http://192.168.56.117/userImage/";
     private ArrayList<String> userIdList = new ArrayList<>();
     private ArrayList<String> userNameList = new ArrayList<>();
     private ArrayList<String> myInfo = new ArrayList<>();
-    private ListView mListView;
-    private Button getInfo, toUpdate, toDelete;
-    private TextView userID, userName, userAuth;
-    private ImageButton img;
     private Context context;
     private HomeViewModel viewModel;
     private SettingFragmentBinding binding;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-    public static CompositeDisposable disposable = new CompositeDisposable();
 
     private ActivityResultLauncher<Intent> imageUpload = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -161,45 +150,41 @@ public class SettingFragment extends Fragment {
 
 //RxJava 사용버전
     private void loadUserInfo(String id){
-        disposable.add(apiInterface.getMyInfo(id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableSingleObserver<Data>() {
-                    @Override
-                    public void onSuccess(@NonNull Data data) {
-                        Log.d("SUCCESS!/USER INFO", "SUCCESS!");
-                        String debugResponse = "";
+        ArrayList<String> fragmentValue = viewModel.getViewModelList().getValue();
 
-                        for(String value: data.getData()){
-                            myInfo.add(value);
-                            debugResponse += value + " ";
+        if(fragmentValue == null){
+            disposable.add(apiInterface.getMyInfo(id)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableSingleObserver<Data>() {
+                        @Override
+                        public void onSuccess(@NonNull Data data) {
+                            Log.d("SUCCESS!/USER INFO", "SUCCESS!");
+                            String debugResponse = "";
+
+                            for(String value: data.getData()){
+                                myInfo.add(value);
+                                debugResponse += value + " ";
+                            }
+                            Log.d("VALUE", debugResponse);
+
+                            setUserInfo(myInfo);
+
+                            Log.d("SETTING", "SET VIEW MODEL");
+                            viewModel.setInfoList(myInfo);
                         }
-                        Log.d("VALUE", debugResponse);
 
-                        String auth;
-                        if(myInfo.get(2).equals("A"))
-                            auth = "관리자";
-                        else
-                            auth = "유저";
-
-                        UserModel user = new UserModel(myInfo.get(0), myInfo.get(1), auth);
-                        binding.setUser(user);
-
-                        if(myInfo.get(3) != null)
-                            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
-                        else
-                            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
-                        Log.d("SETTING", "SET VIEW MODEL");
-                        viewModel.setInfoList(myInfo);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
-                        Log.d("ERROR", "ERROR" + e.getMessage());
-                    }
-                })
-        );
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Toast.makeText(context, "에러 발생!", Toast.LENGTH_SHORT).show();
+                            Log.d("ERROR", "ERROR" + e.getMessage());
+                        }
+                    })
+            );
+        }else{
+            myInfo = fragmentValue;
+            setUserInfo(myInfo);
+        }
     }
 
     private void getUserList(){
@@ -344,6 +329,22 @@ public class SettingFragment extends Fragment {
         cursor.close();
 
         return path;
+    }
+
+    private void setUserInfo(ArrayList<String> values){
+        String auth;
+        if(myInfo.get(2).equals("A"))
+            auth = "관리자";
+        else
+            auth = "유저";
+
+        UserModel user = new UserModel(myInfo.get(0), myInfo.get(1), auth);
+        binding.setUser(user);
+
+        if(myInfo.get(3) != null)
+            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
+        else
+            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
     }
 
 

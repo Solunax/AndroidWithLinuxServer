@@ -1,7 +1,6 @@
 package com.example.ownserver;
 
-import static com.example.ownserver.Fragment.SettingFragment.disposable;
-
+import static com.example.ownserver.Home.disposable;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;

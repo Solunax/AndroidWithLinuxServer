@@ -1,6 +1,6 @@
 package com.example.ownserver;
 
-import static com.example.ownserver.Fragment.SettingFragment.disposable;
+import static com.example.ownserver.Home.disposable;
 import static com.example.ownserver.JoinActivity.checkNull;
 import static com.example.ownserver.Home.apiInterface;
 
