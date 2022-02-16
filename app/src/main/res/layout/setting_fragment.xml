@@ -36,10 +36,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="21dp"
+                android:textColor="@color/black"
                 android:ems="10"
                 android:text="@{user.userId}"
-
                 android:textSize="20dp"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/profile_image_f"
@@ -53,8 +54,9 @@
                 android:layout_marginStart="21dp"
                 android:ems="10"
                 android:text="@{user.userName}"
-
+                android:textColor="@color/black"
                 android:textSize="20dp"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/profile_image_f"
@@ -68,8 +70,9 @@
                 android:layout_marginStart="21dp"
                 android:ems="10"
                 android:text="@{user.userAuth}"
-
+                android:textColor="@color/black"
                 android:textSize="20dp"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/profile_image_f"

@@ -40,11 +40,22 @@ public class LoginActivity extends AppCompatActivity {
     private ArrayList<String> loginInfo = new ArrayList<>();
     private Map<String, String> savedUserInfo = new HashMap<>();
     private LoginActivityBinding binding;
+    private long lastTimeBackPressed;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         disposable.clear();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(System.currentTimeMillis() - lastTimeBackPressed < 1500){
+            finish();
+            return;
+        }
+        lastTimeBackPressed = System.currentTimeMillis();
+        Toast.makeText(this, "한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
     }
 
     @Override

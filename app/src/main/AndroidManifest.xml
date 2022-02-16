@@ -26,7 +26,6 @@
         </activity>
         <activity android:name=".JoinActivity"/>
         <activity android:name=".Home"/>
-<!--            android:configChanges="orientation|screenSize"/>-->
         <activity android:name=".UpdateUserInformation"/>
     </application>
 

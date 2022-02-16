@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,13 +53,28 @@ public class DummyFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         fragmentValue = viewModel.getViewModelList().getValue();
 
-        if(!(fragmentValue == null)){
-            UserModel user = new UserModel(fragmentValue.get(0), fragmentValue.get(1), fragmentValue.get(2));
-            binding.setUser(user);
-        }else{
-            Log.d("DUMMY VALUE", "NULL");
-        }
+        setData(fragmentValue, true);
 
         return view;
+    }
+
+    public void setData(ArrayList<String> data, Boolean isCallInFragment){
+        if(isCallInFragment.equals(true)){
+            if(!(fragmentValue == null)){
+                UserModel user = new UserModel(fragmentValue.get(0), fragmentValue.get(1), fragmentValue.get(2));
+                binding.setUser(user);
+            }else{
+                Log.d("DUMMY VALUE", "NULL");
+                Toast.makeText(context, "로딩된 회원 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }else{
+            if(!(data == null)){
+                UserModel user = new UserModel(data.get(0), data.get(1), data.get(2));
+                binding.setUser(user);
+            }else{
+                Toast.makeText(context, "로딩된 회원 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 }

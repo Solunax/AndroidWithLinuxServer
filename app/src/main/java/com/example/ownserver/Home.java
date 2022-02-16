@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,14 +13,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.ownserver.Fragment.DummyFragment;
 import com.example.ownserver.Fragment.HomeFragment;
 import com.example.ownserver.Fragment.SettingFragment;
+import com.example.ownserver.ViewPager.HomeViewPagerAdapter;
 import com.example.ownserver.databinding.MainScreenBinding;
 import com.example.ownserver.model.HomeViewModel;
+import com.example.ownserver.model.UserModel;
 import com.google.android.material.navigation.NavigationBarView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -38,6 +43,9 @@ public class Home extends AppCompatActivity {
     public static int sequence = 1;
     public static CompositeDisposable disposable  = new CompositeDisposable();
     private FragmentManager fragmentManager = getSupportFragmentManager();
+    private ArrayList<Fragment> fragments = new ArrayList<>();
+    private ArrayList<String> fragmentValue = new ArrayList<>();
+    private long lastTimeBackPressed;
 
     @Override
     protected void onPause() {
@@ -45,11 +53,19 @@ public class Home extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if(System.currentTimeMillis() - lastTimeBackPressed < 1500){
+            finish();
+            return;
+        }
+        lastTimeBackPressed = System.currentTimeMillis();
+        Toast.makeText(this, "한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d("DESTROY", "HOME ACTIVITY");
-        for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++)
-            fragmentManager.popBackStack();
         disposable.dispose();
     }
 
@@ -72,58 +88,47 @@ public class Home extends AppCompatActivity {
         bundle.putString("id", loginId);
         settingFragment.setArguments(bundle);
 
-        if(sequence == MAIN_SEQUENCE){
-            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
-            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
-            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
-        }
-        if(sequence == DUMMY_SEQUENCE){
-            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
-            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
-            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy").commitNow();
-        }
-        if(sequence == SETTING_SEQUENCE){
-            fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "home").commitNow();
-            fragmentManager.beginTransaction().add(R.id.fragment_container, dummyFragment, "dummy");
-            fragmentManager.beginTransaction().add(R.id.fragment_container, settingFragment, "setting").commitNow();
-        }
+        fragments.add(dummyFragment);
+        fragments.add(homeFragment);
+        fragments.add(settingFragment);
+
+        HomeViewPagerAdapter homeViewPagerAdapter = new HomeViewPagerAdapter(this, fragments);
+        binding.homeViewPager.setAdapter(homeViewPagerAdapter);
+        binding.homeViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                binding.bottomMenu.getMenu().getItem(position).setChecked(true);
+
+                if(position == 0){
+                    fragmentValue = homeViewModel.getViewModelList().getValue();
+                    if(!(fragmentValue == null)){
+                        DummyFragment df = (DummyFragment)fragmentManager.findFragmentByTag("f0");
+                        df.setData(fragmentValue, false);
+                    }
+                }
+            }
+        });
+
+        binding.homeViewPager.setCurrentItem(1);
 
         binding.bottomMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right, R.anim.enter_from_right, R.anim.exit_to_right);
                 switch (item.getItemId()){
                     case R.id.dummy:
-                        changeFragment(transaction, "dummy");
+                        binding.homeViewPager.setCurrentItem(0);
                         return true;
 
                     case R.id.main:
-                        changeFragment(transaction, "main");
+                        binding.homeViewPager.setCurrentItem(1);
                         return true;
 
                     case R.id.setting:
-                        changeFragment(transaction, "setting");
+                        binding.homeViewPager.setCurrentItem(2);
                         return true;
                 }
                 return false;
             }
         });
-    }
-
-    private void changeFragment(FragmentTransaction transaction, String fragmentName){
-        if(fragmentName.equals("dummy")) {
-            transaction.detach(dummyFragment).attach(dummyFragment).commitNow();
-            transaction.show(dummyFragment).hide(homeFragment).hide(settingFragment).commitAllowingStateLoss();
-            sequence = DUMMY_SEQUENCE;
-        }
-        else if(fragmentName.equals("main")){
-            transaction.show(homeFragment).hide(dummyFragment).hide(settingFragment).commitAllowingStateLoss();
-            sequence = MAIN_SEQUENCE;
-        }
-        else if(fragmentName.equals("setting")){
-            transaction.show(settingFragment).hide(homeFragment).hide(dummyFragment).commitAllowingStateLoss();
-            sequence = SETTING_SEQUENCE;
-        }
     }
 }

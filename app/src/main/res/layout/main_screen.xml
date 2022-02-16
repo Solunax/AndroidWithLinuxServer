@@ -16,7 +16,14 @@
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:ignore="MissingConstraints" />
+            tools:ignore="MissingConstraints"
+            android:layout_above="@+id/bottom_menu"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/home_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/bottom_menu" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_menu"
@@ -24,9 +31,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:background="#FFFFFF"
+            android:background="@color/white"
             app:itemIconSize="24dp"
-            app:itemIconTint="@color/black"
+            app:itemIconTint="@drawable/navigation_color"
+            app:itemTextColor="@drawable/navigation_color"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_menu" />
 

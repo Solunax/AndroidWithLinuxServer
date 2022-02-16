@@ -38,8 +38,9 @@
             android:layout_marginStart="21dp"
             android:ems="10"
             android:text="@{user.userId}"
-
+            android:textColor="@color/black"
             android:textSize="20dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.104"
@@ -54,8 +55,9 @@
             android:layout_marginStart="21dp"
             android:ems="10"
             android:text="@{user.userName}"
-
+            android:textColor="@color/black"
             android:textSize="20dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.104"
@@ -70,8 +72,9 @@
             android:layout_marginStart="21dp"
             android:ems="10"
             android:text="@{user.userAuth}"
-
+            android:textColor="@color/black"
             android:textSize="20dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.104"
@@ -139,14 +142,14 @@
         <ListView
             android:id="@+id/infoList_f"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="140dp"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.325"
+            app:layout_constraintHorizontal_bias="0.6"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.877" />
+            app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
