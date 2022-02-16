@@ -46,4 +46,7 @@ My Practice Project
 - 2022/02/11 Databinding을 더 많은 Activity에 적용, Android에서 Deprecated된 메소드들을 수정함, Fragment의 불필요한 로딩(replace 방식)을 개선하여 불필요한 로딩 최소화  
 
 - 2022/02/14 화면 회전시 다른 Layout이 표시되도록 변경, 화면이 회전되서 on Destroy가 호출되어도 사용자가 마지막에 위치한 Fragment를 유지, View Model을 사용하여 서버와 통신한 데이터를 저장하고 on Destroy 호출 후 Activity 재 생성시 불필요한 서버 통신을 최소화
-![1](https://user-images.githubusercontent.com/97011241/153829573-5a7bbd97-053b-47ee-8a2f-a5a662c002fd.png)
+![1](https://user-images.githubusercontent.com/97011241/153829573-5a7bbd97-053b-47ee-8a2f-a5a662c002fd.png)  
+
+- 2022/02/16 Fragment에 ViewPager2를 사용하여 화면 슬라이드로 Fragment 전환 가능하게 변경, 기존 Bottom Navigation에 있던 색상 설정 오류를 해결  
+![Screenshot_20220216_151317](https://user-images.githubusercontent.com/97011241/154207308-8b341aff-0e7b-4580-bfc0-493977df4446.png)
