@@ -12,9 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +20,6 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class UpdateUserInformation extends Activity {
     private ArrayList<String> userIdList;

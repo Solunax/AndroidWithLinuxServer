@@ -4,14 +4,10 @@ import static com.example.ownserver.Home.disposable;
 import static com.example.ownserver.JoinActivity.checkNull;
 import static com.example.ownserver.Home.apiInterface;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ownserver.SharedPreference.SavedUserInformation;
 import com.example.ownserver.databinding.LoginActivityBinding;
 import com.example.ownserver.model.Data;
-import com.example.ownserver.model.LoginInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +25,6 @@ import java.util.Map;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private String savedId, savedPw;

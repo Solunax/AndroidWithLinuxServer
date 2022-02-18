@@ -27,6 +27,12 @@ public class JoinActivity extends Activity {
     private JoinActivityBinding binding;
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.clear();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = JoinActivityBinding.inflate(getLayoutInflater());

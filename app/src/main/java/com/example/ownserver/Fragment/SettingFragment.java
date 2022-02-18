@@ -333,18 +333,18 @@ public class SettingFragment extends Fragment {
 
     private void setUserInfo(ArrayList<String> values){
         String auth;
-        if(myInfo.get(2).equals("A"))
+        if(values.get(2).equals("A"))
             auth = "관리자";
         else
             auth = "유저";
 
-        UserModel user = new UserModel(myInfo.get(0), myInfo.get(1), auth);
+        UserModel user = new UserModel(values.get(0), values.get(1), auth);
         binding.setUser(user);
 
-        if(myInfo.get(3) != null)
-            Glide.with(context).load(myInfo.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
+        if(values.get(3) != null)
+            Glide.with(context).load(values.get(3)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().override(100, 100).into(binding.profileImageF);
         else
-            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().into(binding.profileImageF);
+            Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().override(100, 100).into(binding.profileImageF);
     }
 
 

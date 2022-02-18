@@ -83,10 +83,6 @@ public class HomeFragment extends Fragment {
                     Document document = Jsoup.connect(URL).get();
                     Elements values = document.select(".v");
 
-                    Log.d("Value", values.get(0).text());
-                    Log.d("Value", values.get(1).text());
-                    Log.d("Value", values.get(2).text());
-                    Log.d("Value", values.get(8).text());
                     String nameValue = values.get(0).text();
                     nameValue = nameValue.substring(0, nameValue.indexOf(" 4"));
                     infoValues.put("name", nameValue);
@@ -96,9 +92,9 @@ public class HomeFragment extends Fragment {
 
                     message.what = 1;
                     handler.sendMessage(message);
-                    Log.d("THREAD", "FINISH");
+                    Log.d("Home Fragment THREAD", "FINISH");
                 } catch (IOException e) {
-                    Log.d("ERROR", e.getMessage());
+                    Log.d("Home Fragment THREAD", e.getMessage());
                 }
             }
         }).start();

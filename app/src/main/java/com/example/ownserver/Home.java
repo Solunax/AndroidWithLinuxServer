@@ -37,10 +37,6 @@ public class Home extends AppCompatActivity {
     private String loginId;
     public HomeViewModel homeViewModel;
     private MainScreenBinding binding;
-    public final int DUMMY_SEQUENCE = 0;
-    public final int MAIN_SEQUENCE = 1;
-    public final int SETTING_SEQUENCE = 2;
-    public static int sequence = 1;
     public static CompositeDisposable disposable  = new CompositeDisposable();
     private FragmentManager fragmentManager = getSupportFragmentManager();
     private ArrayList<Fragment> fragments = new ArrayList<>();
@@ -66,7 +62,10 @@ public class Home extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d("DESTROY", "HOME ACTIVITY");
+
         disposable.dispose();
+        binding.homeViewPager.setAdapter(null);
+        binding = null;
     }
 
     @Override
