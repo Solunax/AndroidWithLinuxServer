@@ -51,4 +51,4 @@ My Practice Project
 - 2022/02/16 Fragment에 ViewPager2를 사용하여 화면 슬라이드로 Fragment 전환 가능하게 변경, 기존 Bottom Navigation에 있던 색상 설정 오류를 해결  
 ![Screenshot_20220216_151317](https://user-images.githubusercontent.com/97011241/154207308-8b341aff-0e7b-4580-bfc0-493977df4446.png)  
 
-- 2022/02/18 안드로이드 스튜디오의 Profiler와 Leak Canary를 활용하여 메모리 누수 확인 및 수정, 안드로이드 스튜디오에서 발견한 문제들을 확인하여 수정  
+- 2022/02/18 안드로이드 스튜디오의 Profiler와 Leak Canary를 활용하여 메모리 누수 확인, 안드로이드 스튜디오에서 발견한 문제들을 확인하여 수정  
