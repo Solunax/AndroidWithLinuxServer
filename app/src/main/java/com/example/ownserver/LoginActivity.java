@@ -7,7 +7,6 @@ import static com.example.ownserver.Home.apiInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,7 +18,6 @@ import com.example.ownserver.databinding.LoginActivityBinding;
 import com.example.ownserver.model.Data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -30,7 +28,6 @@ public class LoginActivity extends AppCompatActivity {
     private String savedId, savedPw;
     private Boolean savedState;
     private ArrayList<String> loginInfo = new ArrayList<>();
-    private Map<String, String> savedUserInfo = new HashMap<>();
     private LoginActivityBinding binding;
     private long lastTimeBackPressed;
 
@@ -56,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         binding = LoginActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        savedUserInfo = SavedUserInformation.getUserInformation(this);
+        Map<String, String> savedUserInfo = SavedUserInformation.getUserInformation(this);
         Log.d("INFO", savedUserInfo.toString());
         savedId = savedUserInfo.get("id");
         savedPw = savedUserInfo.get("password");
@@ -68,33 +65,27 @@ public class LoginActivity extends AppCompatActivity {
             binding.saveLoginInformation.setChecked(true);
         }
 
-        binding.login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String id = binding.loginId.getText().toString().trim();
-                String password = binding.loginPw.getText().toString().trim();
+        binding.login.setOnClickListener(v -> {
+            String id = binding.loginId.getText().toString().trim();
+            String password = binding.loginPw.getText().toString().trim();
 
-                if(checkNull(id)){
-                    Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-                    binding.loginId.requestFocus();
-                    return;
-                }
-
-                if(checkNull(password)){
-                    Toast.makeText(getApplicationContext(), "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
-                    binding.loginPw.requestFocus();
-                    return;
-                }
-                tryLogin(id, password);
+            if(checkNull(id)){
+                Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
+                binding.loginId.requestFocus();
+                return;
             }
+
+            if(checkNull(password)){
+                Toast.makeText(getApplicationContext(), "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
+                binding.loginPw.requestFocus();
+                return;
+            }
+            tryLogin(id, password);
         });
 
-        binding.join.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), JoinActivity.class);
-                startActivity(intent);
-            }
+        binding.join.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), JoinActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -107,45 +98,39 @@ public class LoginActivity extends AppCompatActivity {
                 .subscribeWith(new DisposableSingleObserver<Data>() {
                     @Override
                     public void onSuccess(@NonNull Data data) {
-                            String debugResponse = "";
+                        loginInfo.addAll(data.getData());
 
-                            for(String value: data.getData()){
-                                loginInfo.add(value);
-                                debugResponse += value + " ";
-                            }
-
-                            try{
-                                if(loginInfo.get(0).isEmpty()){
-                                    Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                                    binding.loginId.requestFocus();
-                                    return;
-                                }
-                            }catch (Exception e){
+                        try{
+                            if(loginInfo.get(0).isEmpty()){
                                 Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
                                 binding.loginId.requestFocus();
                                 return;
                             }
+                        }catch (Exception e){
+                            Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                            binding.loginId.requestFocus();
+                            return;
+                        }
 
-                            if(loginInfo.get(1).equals(password)){
-                                Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getApplicationContext(), Home.class);
+                        if(loginInfo.get(1).equals(password)){
+                            Toast.makeText(getApplicationContext(), "로그인 성공!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), Home.class);
 
-                                if(binding.saveLoginInformation.isChecked())
-                                    SavedUserInformation.setUserInformation(getApplicationContext(), binding.loginId.getText().toString().trim(), binding.loginPw.getText().toString().trim(), "true");
-                                else{
-                                    SavedUserInformation.deleteUserInformation(getApplicationContext());
-                                }
-
-                                intent.putExtra("id", id);
-
-                                finish();
-                                startActivity(intent);
-
-                            }else{
-                                Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
-                                binding.loginPw.requestFocus();
-                                return;
+                            if(binding.saveLoginInformation.isChecked())
+                                SavedUserInformation.setUserInformation(getApplicationContext(), binding.loginId.getText().toString().trim(), binding.loginPw.getText().toString().trim(), "true");
+                            else{
+                                SavedUserInformation.deleteUserInformation(getApplicationContext());
                             }
+
+                            intent.putExtra("id", id);
+
+                            finish();
+                            startActivity(intent);
+
+                        }else{
+                            Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
+                            binding.loginPw.requestFocus();
+                        }
                     }
 
                     @Override
@@ -156,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
                 })
         );
     }
+}
 
 //    Retrofit Ver
 //    private void tryLogin(String id, String password){
@@ -210,4 +196,3 @@ public class LoginActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
-}

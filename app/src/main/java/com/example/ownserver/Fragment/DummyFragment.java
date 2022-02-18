@@ -6,16 +6,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.ownserver.R;
 import com.example.ownserver.databinding.DummyFragmentBinding;
 import com.example.ownserver.model.HomeViewModel;
 import com.example.ownserver.model.UserModel;
@@ -24,8 +21,6 @@ import java.util.ArrayList;
 
 public class DummyFragment extends Fragment {
     private Context context;
-    private TextView id, name, auth;
-    private HomeViewModel viewModel;
     private ArrayList<String> fragmentValue = new ArrayList<>();
     private DummyFragmentBinding binding;
 
@@ -50,7 +45,7 @@ public class DummyFragment extends Fragment {
         binding = DummyFragmentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        HomeViewModel viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
         fragmentValue = viewModel.getViewModelList().getValue();
 
         setData(fragmentValue, true);

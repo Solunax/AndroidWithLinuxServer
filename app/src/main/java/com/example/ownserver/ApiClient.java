@@ -1,9 +1,5 @@
 package com.example.ownserver;
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -30,15 +26,13 @@ public class ApiClient {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
                     .build();
+        }
 
+        return retrofit;
+    }
+}
 //            기존 Retrofit
 //            retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
 //                    .client(client)
 //                    .addConverterFactory(GsonConverterFactory.create(gson))
 //                    .build();
-        }
-
-        return retrofit;
-    }
-
-}

@@ -28,9 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -57,7 +54,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class SettingFragment extends Fragment {
-    private String serverBasePath = "http://192.168.56.117/userImage/";
+    private final String serverBasePath = "http://192.168.56.117/userImage/";
     private ArrayList<String> userIdList = new ArrayList<>();
     private ArrayList<String> userNameList = new ArrayList<>();
     private ArrayList<String> myInfo = new ArrayList<>();
@@ -65,6 +62,7 @@ public class SettingFragment extends Fragment {
     private HomeViewModel viewModel;
     private SettingFragmentBinding binding;
     public static ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private StringBuilder debugResponse = new StringBuilder();
 
     private ActivityResultLauncher<Intent> imageUpload = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -106,6 +104,7 @@ public class SettingFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = SettingFragmentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+
         Bundle bundle = getArguments();
         String loginId = bundle.getString("id");
 
@@ -114,35 +113,18 @@ public class SettingFragment extends Fragment {
 
         loadUserInfo(loginId);
 
-        binding.getInfoF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getUserList();
-            }
+        binding.getInfoF.setOnClickListener(v -> getUserList());
+        binding.deleteInfoF.setOnClickListener(v -> deleteDialog());
+
+        binding.toUpdateUserInfoF.setOnClickListener(v -> {
+            Intent intent = new Intent(context, UpdateUserInformation.class);
+            startActivity(intent);
         });
 
-        binding.toUpdateUserInfoF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, UpdateUserInformation.class);
-                startActivity(intent);
-            }
-        });
-
-        binding.deleteInfoF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteDialog();
-            }
-        });
-
-        binding.profileImageF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                imageUpload.launch(intent);
-            }
+        binding.profileImageF.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+            imageUpload.launch(intent);
         });
 
         return view;
@@ -160,13 +142,13 @@ public class SettingFragment extends Fragment {
                         @Override
                         public void onSuccess(@NonNull Data data) {
                             Log.d("SUCCESS!/USER INFO", "SUCCESS!");
-                            String debugResponse = "";
+                            debugResponse.setLength(0);
 
                             for(String value: data.getData()){
                                 myInfo.add(value);
-                                debugResponse += value + " ";
+                                debugResponse.append(value).append(" ");
                             }
-                            Log.d("VALUE", debugResponse);
+                            Log.d("VALUE", debugResponse.toString());
 
                             setUserInfo(myInfo);
 
@@ -198,15 +180,14 @@ public class SettingFragment extends Fragment {
                     @Override
                     public void onSuccess(@NonNull UserList userList) {
                         Log.d("SUCCESS!/USER LIST", "SUCCESS!");
-
-                        String debugResponse = "";
+                        debugResponse.setLength(0);
 
                         for(UserList.Users user : userList.data){
                             userIdList.add(user.id);
                             userNameList.add(user.name);
-                            debugResponse += "ID : " + user.id + "  NAME : " + user.name + ", ";
+                            debugResponse.append("ID : ").append(user.id).append(" NAME : ").append(user.name).append(", ");
                         }
-                        Log.d("RESULT/USER LIST", debugResponse);
+                        Log.d("RESULT/USER LIST", debugResponse.toString());
 
                         UserListAdapter userListAdapter = new UserListAdapter(context, userIdList, userNameList);
                         userListAdapter.notifyDataSetChanged();
@@ -225,7 +206,7 @@ public class SettingFragment extends Fragment {
     private void uploadImages(String id, String imageFile) {
         File file = new File(imageFile);
         String serverPath = serverBasePath + id;
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        RequestBody requestFile = RequestBody.create(file, MediaType.parse("multipart/form-data"));
         MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", id, requestFile);
 
         disposable.add(apiInterface.uploadImage(body, id, serverPath)
@@ -259,68 +240,39 @@ public class SettingFragment extends Fragment {
         Button yes = (Button)dialog.findViewById(R.id.delete_yes);
         Button no = (Button)dialog.findViewById(R.id.delete_no);
 
-        yes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String deleteIdValue = deleteID.getText().toString().trim();
+        yes.setOnClickListener(v -> {
+            String deleteIdValue = deleteID.getText().toString().trim();
 
-                if(deleteIdValue.length() == 0){
-                    Toast.makeText(context, "삭제할 아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                disposable.add(apiInterface.deleteUser(deleteIdValue)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(new DisposableSingleObserver<UserList>() {
-                            @Override
-                            public void onSuccess(@NonNull UserList userList) {
-                                Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
-                                Log.d("SUCCESS!/ DELETE", "SUCCESS!");
-                                dialog.dismiss();
-                            }
-
-                            @Override
-                            public void onError(@NonNull Throwable e) {
-                                Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
-                                Log.d("ERROR", "ERROR" + e.getMessage());
-                            }
-                        })
-                );
-
-//                Delete User Method Retrofit Ver
-//                Call<Void> deleteUser = apiInterface.deleteUser(deleteIdValue);
-//                deleteUser.enqueue(new Callback<Void>() {
-//                    @Override
-//                    public void onResponse(Call<Void> call, Response<Void> response) {
-//                        if(response.isSuccessful()){
-//                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
-//                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
-//                            dialog.dismiss();
-//                        }else{
-//                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
-//                            Log.d("ERROR", "ERROR" + response.code());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<Void> call, Throwable t) {
-//                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
-//                        Log.d("FAIL", t.getMessage());
-//                    }
-//                });
+            if(deleteIdValue.length() == 0){
+                Toast.makeText(context, "삭제할 아이디를 입력하세요", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            disposable.add(apiInterface.deleteUser(deleteIdValue)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableSingleObserver<UserList>() {
+                        @Override
+                        public void onSuccess(@NonNull UserList userList) {
+                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
+                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
+                            dialog.dismiss();
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+                            Log.d("ERROR", "ERROR" + e.getMessage());
+                        }
+                    })
+            );
         });
 
-        no.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
+        no.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }
+
 
     private String getPath(Uri uri){
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
@@ -346,7 +298,7 @@ public class SettingFragment extends Fragment {
         else
             Glide.with(context).load(R.drawable.ic_launcher_background).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).circleCrop().override(100, 100).into(binding.profileImageF);
     }
-
+}
 
 // 기존 Retrofit 비동기 처리
 //    private void loadUserInfo(String id){
@@ -460,4 +412,25 @@ public class SettingFragment extends Fragment {
 //            }
 //        });
 //    }
-}
+
+//                Delete User Method Retrofit Ver
+//                Call<Void> deleteUser = apiInterface.deleteUser(deleteIdValue);
+//                deleteUser.enqueue(new Callback<Void>() {
+//                    @Override
+//                    public void onResponse(Call<Void> call, Response<Void> response) {
+//                        if(response.isSuccessful()){
+//                            Toast.makeText(context, "삭제 성공", Toast.LENGTH_SHORT).show();
+//                            Log.d("SUCCESS!/ DELETE", "SUCCESS!");
+//                            dialog.dismiss();
+//                        }else{
+//                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+//                            Log.d("ERROR", "ERROR" + response.code());
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<Void> call, Throwable t) {
+//                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show();
+//                        Log.d("FAIL", t.getMessage());
+//                    }
+//                });

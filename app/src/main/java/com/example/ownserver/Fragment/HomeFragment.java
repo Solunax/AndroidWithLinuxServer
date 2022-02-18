@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class HomeFragment extends Fragment {
-    private String URL = "http://192.168.56.117/serverInfo.php";
+    private final String URL = "http://192.168.56.117/serverInfo.php";
     private Context context;
     private HomeFragmentBinding binding;
     private HashMap<String, String> infoValues = new HashMap<>();
@@ -53,11 +53,9 @@ public class HomeFragment extends Fragment {
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
-            switch (message.what){
-                case 1:
-                    ParsingModel data = new ParsingModel(infoValues.get("name"), infoValues.get("date"), infoValues.get("serverAPI"), infoValues.get("phpAPI"));
-                    binding.setData(data);
-                    break;
+            if(message.what == 1){
+                ParsingModel data = new ParsingModel(infoValues.get("name"), infoValues.get("date"), infoValues.get("serverAPI"), infoValues.get("phpAPI"));
+                binding.setData(data);
             }
             return true;
         }
@@ -75,27 +73,24 @@ public class HomeFragment extends Fragment {
     }
 
     private void getServerInformation(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Message message = handler.obtainMessage();
-                    Document document = Jsoup.connect(URL).get();
-                    Elements values = document.select(".v");
+        new Thread(() -> {
+            try {
+                Message message = handler.obtainMessage();
+                Document document = Jsoup.connect(URL).get();
+                Elements values = document.select(".v");
 
-                    String nameValue = values.get(0).text();
-                    nameValue = nameValue.substring(0, nameValue.indexOf(" 4"));
-                    infoValues.put("name", nameValue);
-                    infoValues.put("date", values.get(1).text());
-                    infoValues.put("serverAPI", values.get(2).text());
-                    infoValues.put("phpAPI", values.get(8).text());
+                String nameValue = values.get(0).text();
+                nameValue = nameValue.substring(0, nameValue.indexOf(" 4"));
+                infoValues.put("name", nameValue);
+                infoValues.put("date", values.get(1).text());
+                infoValues.put("serverAPI", values.get(2).text());
+                infoValues.put("phpAPI", values.get(8).text());
 
-                    message.what = 1;
-                    handler.sendMessage(message);
-                    Log.d("Home Fragment THREAD", "FINISH");
-                } catch (IOException e) {
-                    Log.d("Home Fragment THREAD", e.getMessage());
-                }
+                message.what = 1;
+                handler.sendMessage(message);
+                Log.d("Home Fragment THREAD", "FINISH");
+            } catch (IOException e) {
+                Log.d("Home Fragment THREAD", e.getMessage());
             }
         }).start();
     }

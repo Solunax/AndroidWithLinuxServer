@@ -3,15 +3,12 @@ package com.example.ownserver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -21,11 +18,8 @@ import com.example.ownserver.Fragment.SettingFragment;
 import com.example.ownserver.ViewPager.HomeViewPagerAdapter;
 import com.example.ownserver.databinding.MainScreenBinding;
 import com.example.ownserver.model.HomeViewModel;
-import com.example.ownserver.model.UserModel;
-import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -102,7 +96,9 @@ public class Home extends AppCompatActivity {
                     fragmentValue = homeViewModel.getViewModelList().getValue();
                     if(!(fragmentValue == null)){
                         DummyFragment df = (DummyFragment)fragmentManager.findFragmentByTag("f0");
-                        df.setData(fragmentValue, false);
+
+                        if (df != null)
+                            df.setData(fragmentValue, false);
                     }
                 }
             }
@@ -110,24 +106,21 @@ public class Home extends AppCompatActivity {
 
         binding.homeViewPager.setCurrentItem(1);
 
-        binding.bottomMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.dummy:
-                        binding.homeViewPager.setCurrentItem(0);
-                        return true;
+        binding.bottomMenu.setOnItemSelectedListener(item -> {
+            switch (item.getItemId()){
+                case R.id.dummy:
+                    binding.homeViewPager.setCurrentItem(0);
+                    return true;
 
-                    case R.id.main:
-                        binding.homeViewPager.setCurrentItem(1);
-                        return true;
+                case R.id.main:
+                    binding.homeViewPager.setCurrentItem(1);
+                    return true;
 
-                    case R.id.setting:
-                        binding.homeViewPager.setCurrentItem(2);
-                        return true;
-                }
-                return false;
+                case R.id.setting:
+                    binding.homeViewPager.setCurrentItem(2);
+                    return true;
             }
+            return false;
         });
     }
 }

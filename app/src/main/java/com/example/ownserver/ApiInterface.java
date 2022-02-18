@@ -1,15 +1,10 @@
 package com.example.ownserver;
 
 import com.example.ownserver.model.Data;
-import com.example.ownserver.model.IdList;
-import com.example.ownserver.model.LoginInfo;
-import com.example.ownserver.model.User;
 import com.example.ownserver.model.UserList;
 
 import io.reactivex.Single;
 import okhttp3.MultipartBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -47,7 +42,7 @@ public interface ApiInterface {
     @Multipart
     @POST("uploadImage.php")
     Single<Data> uploadImage(@Part MultipartBody.Part File, @Part("id") String id, @Part("serverPath") String serverPath);
-
+}
 //    Retrofit 버전
 //    @GET("getMyInfo.php")
 //    Call<Data> getMyInfo(@Query("id") String id);
@@ -75,4 +70,3 @@ public interface ApiInterface {
 //    @Multipart
 //    @POST("uploadImage.php")
 //    Call<Void> uploadImage(@Part MultipartBody.Part File, @Part("id") String id, @Part("serverPath") String serverPath);
-}

@@ -4,14 +4,12 @@ import static com.example.ownserver.Home.disposable;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.ownserver.databinding.UpdateUserInformationBinding;
 import com.example.ownserver.model.UserList;
 
 import java.util.ArrayList;
@@ -23,41 +21,31 @@ import io.reactivex.schedulers.Schedulers;
 
 public class UpdateUserInformation extends Activity {
     private ArrayList<String> userIdList;
-    private EditText id, name;
-    private Button update;
-    private ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+    private UpdateUserInformationBinding binding;
+    private final ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.update_user_information);
-
-        id = (EditText)findViewById(R.id.updateUserID);
-        name = (EditText)findViewById(R.id.updateUserName);
-
-        update = (Button)findViewById(R.id.updateUserInfo);
+        binding = UpdateUserInformationBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         userIdList = new ArrayList<>();
 
-        update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateUserInfo();
-            }
-        });
+        binding.updateUserID.setOnClickListener(view -> updateUserInfo());
     }
     private void updateUserInfo(){
         userIdList.clear();
-        if(id.getText().toString().length() == 0){
+        if(binding.updateUserID.getText().toString().length() == 0){
             Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(name.getText().toString().length() < 2){
+        if(binding.updateUserName.getText().toString().length() < 2){
             Toast.makeText(this, "변경할 이름을 입력하세요", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        disposable.add(apiInterface.updateUser(id.getText().toString().trim(), name.getText().toString().trim())
+        disposable.add(apiInterface.updateUser(binding.updateUserID.getText().toString().trim(), binding.updateUserName.getText().toString().trim())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<UserList>() {
@@ -84,7 +72,7 @@ public class UpdateUserInformation extends Activity {
                 })
         );
     }
-
+}
 
 //    Retrofit Ver
 //    private void updateUserInfo(){
@@ -128,4 +116,3 @@ public class UpdateUserInformation extends Activity {
 //            }
 //        });
 //    }
-}

@@ -8,13 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class UserListAdapter extends BaseAdapter {
-    Context userListContext = null;
-    LayoutInflater userListLayoutInflater = null;
-    ArrayList<String> userIdList = new ArrayList<>();
-    ArrayList<String> userNameList = new ArrayList<>();
+    Context userListContext;
+    LayoutInflater userListLayoutInflater;
+    ArrayList<String> userIdList;
+    ArrayList<String> userNameList;
 
     public UserListAdapter(Context context, ArrayList<String> intentUserIdList, ArrayList<String> intentUserNameList){
         userListContext = context;
@@ -39,7 +38,7 @@ public class UserListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View converView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         View view = userListLayoutInflater.inflate(R.layout.list, null);
 
         TextView userID = (TextView)view.findViewById(R.id.list_id);

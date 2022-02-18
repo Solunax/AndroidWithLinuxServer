@@ -3,7 +3,6 @@ package com.example.ownserver;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,40 +37,32 @@ public class JoinActivity extends Activity {
         binding = JoinActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.idCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                idChecking(binding.joinUserID.getText().toString().trim());
+        binding.idCheck.setOnClickListener(view -> idChecking(binding.joinUserID.getText().toString().trim()));
+
+        binding.joinComplete.setOnClickListener(view -> {
+            String id = binding.joinUserID.getText().toString().trim();
+            String password = binding.joinUserPW.getText().toString().trim();
+            String name = binding.joinUserName.getText().toString().trim();
+
+            if(checkNull(id)){
+                Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
+                binding.joinUserID.requestFocus();
+                return;
             }
-        });
 
-        binding.joinComplete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String id = binding.joinUserID.getText().toString().trim();
-                String password = binding.joinUserPW.getText().toString().trim();
-                String name = binding.joinUserName.getText().toString().trim();
-
-                if(checkNull(id)){
-                    Toast.makeText(getApplicationContext(), "아이디를 입력하세요", Toast.LENGTH_SHORT).show();
-                    binding.joinUserID.requestFocus();
-                    return;
-                }
-
-                if(checkNull(password)){
-                    Toast.makeText(getApplicationContext(), "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
-                    binding.joinUserPW.requestFocus();
-                    return;
-                }
-
-                if(checkNull(name)){
-                    Toast.makeText(getApplicationContext(), "이름을 입력하세요", Toast.LENGTH_SHORT).show();
-                    binding.joinUserName.requestFocus();
-                    return;
-                }
-
-                joinUser(id, password, name);
+            if(checkNull(password)){
+                Toast.makeText(getApplicationContext(), "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
+                binding.joinUserPW.requestFocus();
+                return;
             }
+
+            if(checkNull(name)){
+                Toast.makeText(getApplicationContext(), "이름을 입력하세요", Toast.LENGTH_SHORT).show();
+                binding.joinUserName.requestFocus();
+                return;
+            }
+
+            joinUser(id, password, name);
         });
     }
 
@@ -90,14 +81,10 @@ public class JoinActivity extends Activity {
             .subscribeWith(new DisposableSingleObserver<Data>() {
                @Override
                public void onSuccess(@NonNull Data data) {
-                   String debugResponse = "";
 
-                   for(String value: data.getData()){
-                       idList.add(value);
-                       debugResponse += value + " ";
-                   }
+                   idList.addAll(data.getData());
+
                    Log.d("ID LIST", idList.toString());
-                   Log.d("ID", debugResponse);
 
                    if(idList.contains(id))
                        Toast.makeText(getApplicationContext(), "중복된 아이디가 존재합니다.", Toast.LENGTH_SHORT).show();
@@ -136,6 +123,11 @@ public class JoinActivity extends Activity {
                 })
         );
     }
+
+    public static Boolean checkNull(String value){
+        return value.isEmpty();
+    }
+}
 
 //    Retrofit Ver
 //    아이디 중복검사
@@ -203,11 +195,3 @@ public class JoinActivity extends Activity {
 //            }
 //        });
 //    }
-
-    public static Boolean checkNull(String value){
-        if(value.isEmpty())
-            return true;
-        else
-            return false;
-    }
-}
