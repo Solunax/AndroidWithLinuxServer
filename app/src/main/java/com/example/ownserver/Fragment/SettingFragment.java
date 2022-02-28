@@ -71,6 +71,7 @@ public class SettingFragment extends Fragment {
                 if(result.getResultCode() == RESULT_OK){
                     Intent intent= result.getData();
                     String path = getPath(intent.getData());
+                    Log.d("PATH", path);
                     uploadImages(binding.idF.getText().toString().trim(), path);
             }
         }
