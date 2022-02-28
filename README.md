@@ -52,3 +52,7 @@ My Practice Project
 ![Animation](https://user-images.githubusercontent.com/97011241/154844396-ef182720-d136-4921-8d12-3bcc46d7aee7.gif)
   
 - 2022/02/18 안드로이드 스튜디오의 Profiler와 Leak Canary를 활용하여 메모리 누수 확인, 안드로이드 스튜디오에서 발견한 문제들을 확인하여 수정  
+
+- 2022/02/28 기존에 로그인 정보 저장 기능을 위해 사용한 SavePreference를 대체하여 Room을 사용
+![1](https://user-images.githubusercontent.com/97011241/155942571-9f650d92-89c7-432f-b8c7-315cef341b9b.png)
+
