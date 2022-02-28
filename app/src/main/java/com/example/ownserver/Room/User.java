@@ -1,13 +1,11 @@
 package com.example.ownserver.Room;
 
-import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "user")
 public class User {
     @PrimaryKey
-    @NonNull
     private int number = 0;
 
     private String id;

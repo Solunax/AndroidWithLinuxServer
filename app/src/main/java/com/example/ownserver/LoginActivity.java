@@ -22,7 +22,6 @@ import com.example.ownserver.databinding.LoginActivityBinding;
 import com.example.ownserver.model.Data;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
