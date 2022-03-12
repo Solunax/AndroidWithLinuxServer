@@ -116,13 +116,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onSuccess(@NonNull Data data) {
                         loginInfo.addAll(data.getData());
 
-                        try{
-                            if(loginInfo.get(0).isEmpty()){
-                                Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                                binding.loginId.requestFocus();
-                                return;
-                            }
-                        }catch (Exception e){
+                        if(loginInfo.isEmpty()){
                             Toast.makeText(getApplicationContext(), "아이디가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
                             binding.loginId.requestFocus();
                             return;
